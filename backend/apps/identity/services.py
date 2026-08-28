@@ -24,9 +24,9 @@ class UserService(BaseService[Users]):
         data = schema.model_dump()
         data["password_hash"] = hashed_pwd
         
-        return await self.create(schema)
+        return await self.create(schema, password_hash=hashed_pwd)
 
-    async def login(self, credentials: UserLogin) -> tuple[Users, str]:
+    async def authenticate(self, credentials: UserLogin) -> tuple[Users, str]:
         user = await self.repository.get(
             or_(
                 self.model.email==credentials.login,

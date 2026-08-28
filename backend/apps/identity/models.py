@@ -33,7 +33,7 @@ class Users(Base, SoftDeleteMixin):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_verify: Mapped[bool] = mapped_column(Boolean, default=True)
     
-    last_login: Mapped[datetime | None] = mapped_column(DateTime, default=None)
+    last_login: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     
     roles: Mapped[list["Roles"]] = relationship(secondary=user_roles, lazy="selectin", back_populates="users")
