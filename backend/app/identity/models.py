@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, Table, func
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from zcore import Base
+from zcore import Base, SoftDeleteMixin
 
 user_roles = Table(
     "user_roles",
@@ -14,7 +14,7 @@ user_roles = Table(
 )
 
 
-class Users(Base):
+class Users(Base, SoftDeleteMixin):
     __tablename__ = "users"
     
     id: Mapped[uuid.UUID] = mapped_column(
@@ -27,7 +27,7 @@ class Users(Base):
     password_hash: Mapped[str] = mapped_column(String(255))
     
     first_name: Mapped[str] = mapped_column(String(50))
-    last_name: Mapped[str] = mapped_column(String(75))
+    last_name: Mapped[str | None] = mapped_column(String(75), nullable=True)
     
     avatar_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -35,7 +35,6 @@ class Users(Base):
     
     last_login: Mapped[datetime | None] = mapped_column(DateTime, default=None)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    deleted_at: Mapped[datetime] = mapped_column(DateTime)
     
     roles: Mapped[list["Roles"]] = relationship(secondary=user_roles, lazy="selectin", back_populates="users")
     
