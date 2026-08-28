@@ -1,5 +1,7 @@
 import uuid
+from typing import Annotated
 
+from fastapi import Depends
 from zcore import BaseAuth, container
 
 from .models import Users
@@ -24,3 +26,7 @@ class JWTAuth(BaseAuth[UserResponse]):
             return None
         user_service = container.resolve(UserService)
         return await user_service.repository.get(id=user_id)
+
+auth_backend = JWTAuth()
+
+CurrentUser = Annotated[UserResponse, Depends(auth_backend)]
