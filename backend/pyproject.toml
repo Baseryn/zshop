@@ -17,6 +17,7 @@ maintainers = [
 ]
 dependencies = [
     "fastapi>=0.110.0",
+    "fastapi-zcore-framework>=0.1.0b8",
     "pydantic>=2.6.0",
     "pydantic-settings>=2.2.0",
     "structlog>=24.1.0",
