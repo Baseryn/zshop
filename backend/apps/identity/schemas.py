@@ -67,13 +67,13 @@ class UserResponse(UserBase):
 class UserRegister(BaseModel):
     email: EmailStr
     username: str = Field(max_length=50)
-    password: str = Field(min_length=6, max_length=128)
+    password_hash: str = Field(min_length=6, max_length=128)
     first_name: str = Field(max_length=50)
     last_name: str | None = Field(default=None, max_length=75)
 
 class UserLogin(BaseModel):
     login: str = Field(description="Username or Email")
-    password: str
+    password_hash: str
 
 class TokenResponse(BaseModel):
     access_token: str

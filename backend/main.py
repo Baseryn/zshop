@@ -10,7 +10,7 @@ from zcore.exceptions import AppException, app_exception_handler
 from zcore.logging import setup_logging
 from zcore.web import RequestLogMiddleware, ScopedDependencyMiddleware
 
-from app.identity.plugin import IdentityPlugin
+from apps.identity.plugin import IdentityPlugin
 
 # Initialize Structured Logging
 setup_logging()

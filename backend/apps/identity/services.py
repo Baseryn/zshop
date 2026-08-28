@@ -14,16 +14,17 @@ class UserService(BaseService[Users]):
         super().__init__(model=Users, repository=repository)
 
     async def register(self, schema: UserRegister) -> Users:
-        if await self.repository.exist(email=schema.email):
-            raise DuplicateEntity(message="Email already registered.")
-        if await self.repository.exist(username=schema.username):
-            raise DuplicateEntity(message="Username already taken.")
+        if await self.repository.exist(or_(
+            self.model.email==schema.email,
+            self.model.username==schema.username
+        )):
+            raise DuplicateEntity(message="Email or username already registered.")
 
-        hashed_pwd = Security.hash_password(schema.password)
-        data = schema.model_dump(exclude={"password"})
+        hashed_pwd = Security.hash_password(schema.password_hash)
+        data = schema.model_dump()
         data["password_hash"] = hashed_pwd
-
-        return await self.create(schema, password_hash=hashed_pwd)
+        
+        return await self.create(schema)
 
     async def login(self, credentials: UserLogin) -> tuple[Users, str]:
         user = await self.repository.get(
@@ -33,7 +34,7 @@ class UserService(BaseService[Users]):
                 )
             )
 
-        if not user or not Security.verify_password(credentials.password, user.password_hash):
+        if not user or not Security.verify_password(credentials.password_hash, user.password_hash):
             raise AuthError(message="Invalid credentials.")
 
         if not user.is_active:
