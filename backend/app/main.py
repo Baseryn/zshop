@@ -1,13 +1,16 @@
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from fastapi import FastAPI
 from zcore import Kernel, settings
-from zcore.web import RequestLogMiddleware, ScopedDependencyMiddleware
-from zcore.exceptions import app_exception_handler, AppException
 from zcore.db import db_manager, register_db_event_dispatcher
+from zcore.exceptions import AppException, app_exception_handler
 from zcore.logging import setup_logging
+from zcore.web import RequestLogMiddleware, ScopedDependencyMiddleware
+
+from app.identity.plugin import IdentityPlugin
 
 # Initialize Structured Logging
 setup_logging()
@@ -22,6 +25,7 @@ db_manager.init_app(
 
 # Initialize ZCore Kernel & Plugins
 kernel = Kernel()
+kernel.add_plugin(IdentityPlugin())
 
 # Register global database event dispatcher
 register_db_event_dispatcher(kernel.dispatcher)
