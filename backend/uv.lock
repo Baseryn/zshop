@@ -154,6 +154,27 @@ wheels = [
 ]
 
 [[package]]
+name = "fastapi-zcore-framework"
+version = "0.1.0b8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "fastapi" },
+    { name = "jsonschema" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "python-multipart" },
+    { name = "questionary" },
+    { name = "rich" },
+    { name = "structlog" },
+    { name = "uvicorn" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ab/df/37bc6faa86d9f07646ca63980c4c44a0045357c39e8d0e04d2af7f5e49ab/fastapi_zcore_framework-0.1.0b8.tar.gz", hash = "sha256:3236b10c80d4d2c243bb6da2e96cefb9d5ba68bbf54b512d6d5cdda1d54a98bc", size = 124568, upload-time = "2026-08-28T12:36:09.273Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6e/88/748d4d3852e67d09352536e86a8b36c122e1026aeda235076bf44a13ab74/fastapi_zcore_framework-0.1.0b8-py3-none-any.whl", hash = "sha256:492fe819be9333fb94bd5ca0f96fd773ea1b0cf863561213a9ada4b652f7ecab", size = 98580, upload-time = "2026-08-28T12:36:07.792Z" },
+]
+
+[[package]]
 name = "h11"
 version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -926,6 +947,7 @@ source = { editable = "." }
 dependencies = [
     { name = "anyio" },
     { name = "fastapi" },
+    { name = "fastapi-zcore-framework" },
     { name = "jsonschema" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
@@ -949,6 +971,7 @@ dev = [
 requires-dist = [
     { name = "anyio", specifier = ">=4.3.0" },
     { name = "fastapi", specifier = ">=0.110.0" },
+    { name = "fastapi-zcore-framework", specifier = ">=0.1.0b8" },
     { name = "jsonschema", specifier = ">=4.21.0" },
     { name = "pydantic", specifier = ">=2.6.0" },
     { name = "pydantic-settings", specifier = ">=2.2.0" },
