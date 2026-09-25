@@ -11,15 +11,14 @@ import structlog
 from zcore import BaseService, EventDispatcher, UnitOfWork, on_event
 from zcore.exceptions import EntityNotFound, ValidationError
 
+from contracts.catalog import ProductContract
+
 from .models import OrderItems, Orders, OrderStatus
 from .repositories import OrderItemRepository, OrderRepository
 from .schemas import OrderCreate, OrderStatusUpdate
 from .tasks import generate_invoice_and_notify_customer
 
 logger = structlog.get_logger("zshop.orders")
-
-
-
 
 
 class OrderService(BaseService[Orders]):
@@ -29,7 +28,7 @@ class OrderService(BaseService[Orders]):
         self,
         repository: OrderRepository,
         item_repository: OrderItemRepository,
-        inventory_service: InventoryContract,
+        inventory_service: ProductContract,
         dispatcher: EventDispatcher,
     ):
         super().__init__(model=Orders, repository=repository)
