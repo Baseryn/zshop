@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from zcore import Base, settings
 
 from alembic import context
+from apps.catalog.models import Categories, Products  # noqa: F401
 from apps.identity.models import Roles, Users, user_roles  # noqa: F401
 
 # this is the Alembic Config object, which provides
