@@ -1,9 +1,6 @@
-"""Business services and Domain Event listeners for Orders.
+"""Business services and Domain Event listeners for the Orders domain.
 
-Demonstrates:
-- UnitOfWork coordinating multi-repository transactions (Order + Stock reduction).
-- UnitOfWork.register_event ensuring events are only dispatched after successful commit.
-- @on_event decorator capturing post-commit domain occurrences.
+Fully decoupled using Protocols and ZCore's IoC Container and UnitOfWork.
 """
 
 import uuid
@@ -14,8 +11,6 @@ import structlog
 from zcore import BaseService, EventDispatcher, UnitOfWork, on_event
 from zcore.exceptions import EntityNotFound, ValidationError
 
-from apps.catalog.repositories import ProductRepository
-
 from .models import OrderItems, Orders, OrderStatus
 from .repositories import OrderItemRepository, OrderRepository
 from .schemas import OrderCreate, OrderStatusUpdate
@@ -24,49 +19,50 @@ from .tasks import generate_invoice_and_notify_customer
 logger = structlog.get_logger("zshop.orders")
 
 
+
+
+
 class OrderService(BaseService[Orders]):
-    """Service orchestrating atomic order placements, payments, and state transitions."""
+    """Service orchestrating atomic order transactions and state changes."""
 
     def __init__(
         self,
         repository: OrderRepository,
         item_repository: OrderItemRepository,
-        product_repository: ProductRepository,
+        inventory_service: InventoryContract,
         dispatcher: EventDispatcher,
     ):
         super().__init__(model=Orders, repository=repository)
         self.item_repository = item_repository
-        self.product_repository = product_repository
+        self.inventory_service = inventory_service
         self.dispatcher = dispatcher
 
     async def place_order(self, user_id: uuid.UUID, schema: OrderCreate) -> Orders:
-        """Place an order atomically using ZCore's UnitOfWork.
+        """Place an order atomically using UnitOfWork and InventoryContract.
         
-        Validates inventory for every item, decrements product stock, computes totals,
-        persists the order aggregate, and registers domain events for post-commit dispatch.
+        Guarantees that order creation and stock decrements commit or rollback together.
         """
-        # Execute entire multi-step process inside UnitOfWork
         async with UnitOfWork(session=self.repository.db, dispatcher=self.dispatcher) as uow:
             total_amount = Decimal("0.00")
             order_items_to_create: list[OrderItems] = []
 
-            # 1. Validate items and atomically reserve product stock
             for item_in in schema.items:
-                product = await self.product_repository.get(id=item_in.product_id)
-                if not product or not product.is_active:
+                product = await self.inventory_service.get(id=item_in.product_id)
+                if not product or not getattr(product, "is_active", True):
                     raise EntityNotFound(
                         message=f"Product with id '{item_in.product_id}' is unavailable."
                     )
 
-                if product.stock_quantity < item_in.quantity:
+                available_stock = getattr(product, "stock_quantity", 0)
+                if available_stock < item_in.quantity:
                     raise ValidationError(
                         message=(
                             f"Insufficient stock for '{product.name}'. "
-                            f"Requested: {item_in.quantity}, Available: {product.stock_quantity}"
+                            f"Requested: {item_in.quantity}, Available: {available_stock}"
                         )
                     )
 
-                # Atomically decrement inventory in catalog
+                # Atomically adjust inventory via contract
                 product.stock_quantity -= item_in.quantity
 
                 subtotal = product.price * item_in.quantity
@@ -80,7 +76,6 @@ class OrderService(BaseService[Orders]):
                 )
                 order_items_to_create.append(order_item)
 
-            # 2. Persist order header
             new_order = Orders(
                 user_id=user_id,
                 status=OrderStatus.PENDING,
@@ -92,7 +87,7 @@ class OrderService(BaseService[Orders]):
             await self.repository.db.flush()
             await self.repository.db.refresh(new_order)
 
-            # 3. Register domain event (dispatched ONLY if UoW commits successfully!)
+            # Register domain event dispatched only after successful database commit
             uow.register_event(
                 "order.created",
                 {
@@ -105,7 +100,7 @@ class OrderService(BaseService[Orders]):
         return new_order
 
     async def update_status(self, order_id: uuid.UUID, data_in: OrderStatusUpdate) -> Orders:
-        """Transition order state and emit 'order.status_changed' event."""
+        """Transition order status and emit 'order.status_changed' event."""
         async with UnitOfWork(session=self.repository.db, dispatcher=self.dispatcher) as uow:
             order = await self.get(id=order_id)
             old_status = order.status
@@ -129,20 +124,18 @@ class OrderService(BaseService[Orders]):
 
 
 class OrderNotificationListener:
-    """Event subscriber listening to domain occurrences dispatched by UnitOfWork."""
+    """Event subscriber reacting to post-commit domain occurrences."""
 
     @on_event("order.created")
     async def handle_order_created(self, payload: dict[str, Any]) -> None:
-        """Respond to successful order placement by scheduling background processing."""
+        """Schedule isolated background tasks upon order placement."""
         order_id = uuid.UUID(payload["order_id"])
         logger.info("Captured 'order.created' domain event", order_id=str(order_id))
-
-        # Launch background task with isolated IoC container scope and DB session
         await generate_invoice_and_notify_customer(order_id=order_id)
 
     @on_event("order.status_changed")
     async def handle_status_changed(self, payload: dict[str, Any]) -> None:
-        """Respond to order status modifications."""
+        """React to order status modifications."""
         logger.info(
             "Captured 'order.status_changed' domain event",
             order_id=payload["order_id"],
