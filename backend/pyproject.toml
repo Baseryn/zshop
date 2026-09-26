@@ -10,10 +10,10 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [
-    { name = "Ali Alf Ostovar", email = "240363843+alialfostovar@users.noreply.github.com" }
+    { name = "Ali Alf Ostovar"}
 ]
 maintainers = [
-    { name = "Baseryn" }
+    { name = "Baseryn", email = "support@baseryn.com"}
 ]
 dependencies = [
     "fastapi>=0.110.0",
