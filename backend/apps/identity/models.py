@@ -7,7 +7,7 @@ ZCore's Base declarative and SoftDeleteMixin for audit-safe lifecycles.
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, JSON, String, Table, func
+from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, String, Table, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from zcore import Base, SoftDeleteMixin
 
