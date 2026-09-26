@@ -121,7 +121,7 @@ class OrderService(BaseService[Orders]):
                 },
             )
 
-        return order
+        return await self.get(id=order_id)
 
 
 class OrderNotificationListener:
