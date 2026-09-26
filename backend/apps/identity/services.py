@@ -1,7 +1,7 @@
 """Domain business services for the Identity module.
 
 Coordinates transactional authentication, role assignments, and leverages ZCore's
-WriteServiceMixin lifecycle hooks (such as pre_create) for clean password hashing.
+WriteServiceMixin lifecycle hooks (such as pre_create and pre_update) for clean password hashing.
 """
 
 from typing import Any
@@ -24,26 +24,17 @@ class UserService(BaseService[Users]):
         self.role_repository = role_repository
 
     async def pre_create(self, schema: BaseModel) -> dict[str, Any] | None:
-        """Lifecycle hook executed prior to database insertion.
-        
-        Extracts the plaintext password, securely hashes it using Argon2id,
-        and provides it as 'password_hash' to the model.
-        """
+        """Extract plaintext password and return encrypted hash for model persistence."""
         if isinstance(schema, (UserCreate, UserRegister)):
-            hashed = Security.hash_password(schema.password)
-            return {"password_hash": hashed}
+            return {"password_hash": Security.hash_password(schema.password)}
         return None
 
     async def pre_update(
         self, target: Users | Any, schema: BaseModel, partial: bool
     ) -> dict[str, Any] | None:
-        """Lifecycle hook executed prior to updating a record.
-        
-        Hashes password if an updated password is provided in UserUpdate.
-        """
+        """Extract updated password and return new encrypted hash if modification was requested."""
         if isinstance(schema, UserUpdate) and schema.password:
-            hashed = Security.hash_password(schema.password)
-            return {"password_hash": hashed}
+            return {"password_hash": Security.hash_password(schema.password)}
         return None
 
     async def register(self, schema: UserRegister) -> Users:
@@ -69,7 +60,9 @@ class UserService(BaseService[Users]):
             )
         )
 
-        if not user or not Security.verify_password(credentials.password, user.password_hash):
+        if not user or not Security.verify_password(
+            credentials.password, user.password_hash
+        ):
             raise AuthError(message="Invalid username/email or password.")
 
         if not user.is_active:
