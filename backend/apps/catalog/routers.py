@@ -68,7 +68,7 @@ class ProductRouter(BaseRouter[ProductCreate, ProductUpdate]):
 
     def get_route_dependencies(self, route_key: RouteKey, action: str) -> list[Any]:
         """Allow public access for browsing; require permissions for mutations."""
-        if route_key in (RouteKey.GET, RouteKey.GET_ALL, RouteKey.SEARCH, RouteKey.LOOKUP):
+        if route_key in (RouteKey.GET_ALL, RouteKey.SEARCH, RouteKey.LOOKUP):
             return []
         return super().get_route_dependencies(route_key, action)
 
