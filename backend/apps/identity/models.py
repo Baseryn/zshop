@@ -7,8 +7,7 @@ ZCore's Base declarative and SoftDeleteMixin for audit-safe lifecycles.
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, Table, func
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, JSON, String, Table, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from zcore import Base, SoftDeleteMixin
 
@@ -31,9 +30,10 @@ user_roles = Table(
 
 class Roles(Base):
     """Role model for Role-Based Access Control (RBAC).
-    
-    Holds granular system scopes (e.g. 'order:create') and field restriction rules
-    (e.g. 'users.view.first_name') utilized by ZCore's context-aware pruning engine.
+
+    Holds granular system scopes and field restriction rules utilized by
+    ZCore's context-aware pruning engine. Uses JSON serialization to ensure
+    cross-database portability across SQLite, PostgreSQL, and MySQL.
     """
 
     __tablename__ = "roles"
@@ -44,11 +44,11 @@ class Roles(Base):
     )
     name: Mapped[str] = mapped_column(String(100), unique=True, index=True)
     scopes: Mapped[list[str]] = mapped_column(
-        ARRAY(String),
+        JSON,
         default=list,
     )
     restricted_fields: Mapped[list[str]] = mapped_column(
-        ARRAY(String),
+        JSON,
         default=list,
     )
     description: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -63,7 +63,7 @@ class Roles(Base):
 
 class Users(Base, SoftDeleteMixin):
     """User account entity adhering to ZCore's UserProtocol.
-    
+
     Includes soft deletion, timezone-aware audit timestamps, and dynamic
     properties computing aggregate scopes and field restrictions across all active roles.
     """
