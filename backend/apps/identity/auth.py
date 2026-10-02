@@ -9,6 +9,7 @@ from typing import Annotated
 
 from fastapi import Depends
 from zcore import BaseAuth, container
+from zcore.security.dependencies import get_current_user_stub
 
 from .models import Users
 from .schemas import UserResponse
@@ -17,7 +18,7 @@ from .services import UserService
 
 class JWTAuth(BaseAuth[UserResponse]):
     """Custom authentication provider extending ZCore's generic BaseAuth.
-    
+
     Verifies JWT access tokens, leverages Redis/local memory cache for user data,
     and automatically populates ctx.user_id, ctx.restricted_fields, and user scopes.
     """
@@ -28,7 +29,7 @@ class JWTAuth(BaseAuth[UserResponse]):
             identity_claim="sub",
             token_type="access",
             cache_prefix="auth:users",
-            cache_ttl=300,  # 5 minutes TTL
+            cache_ttl=300,
         )
 
     async def fetch_user(self, identity: str) -> Users | None:
@@ -45,5 +46,4 @@ class JWTAuth(BaseAuth[UserResponse]):
 # Global singleton instance of the auth backend
 auth_backend = JWTAuth()
 
-# Reusable dependency annotation for securing custom route endpoints
-CurrentUser = Annotated[UserResponse, Depends(auth_backend)]
+CurrentUser = Annotated[UserResponse, Depends(get_current_user_stub)]

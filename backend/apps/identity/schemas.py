@@ -65,8 +65,8 @@ class UserBase(Zchema):
 
 class UserCreate(UserBase):
     """Payload schema for creating a user via the admin or user management router."""
-    password: str = Field(min_length=6, max_length=128)
-    role_ids: list[uuid.UUID] = Field(default_factory=list)
+    password: str = Field(min_length=6, max_length=128, exclude=True)
+    role_ids: list[uuid.UUID] = Field(default_factory=list, exclude=True)
 
 
 class UserUpdate(Zchema):
@@ -78,7 +78,9 @@ class UserUpdate(Zchema):
     last_name: str | None = Field(default=None, max_length=75)
     avatar_url: str | None = None
     is_active: bool | None = None
-    password: str | None = Field(default=None, min_length=6, max_length=128)
+    password: str | None = Field(
+        default=None, min_length=6, max_length=128, exclude=True
+    )
 
 
 class UserResponse(UserBase):
@@ -102,10 +104,11 @@ class UserResponse(UserBase):
 # ==========================================
 
 class UserRegister(BaseModel):
-    """Registration schema accepting clean plaintext password for secure hashing."""
+    """Registration schema accepting plaintext password excluded from direct model dumps."""
+
     email: EmailStr
     username: str = Field(max_length=50)
-    password: str = Field(min_length=6, max_length=128)
+    password: str = Field(min_length=6, max_length=128, exclude=True)
     first_name: str = Field(max_length=50)
     last_name: str | None = Field(default=None, max_length=75)
 

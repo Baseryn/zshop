@@ -38,7 +38,7 @@ class OrderService(BaseService[Orders]):
 
     async def place_order(self, user_id: uuid.UUID, schema: OrderCreate) -> Orders:
         """Place an order atomically using UnitOfWork and InventoryContract.
-        
+
         Guarantees that order creation and stock decrements commit or rollback together.
         """
         async with UnitOfWork(session=self.repository.db, dispatcher=self.dispatcher) as uow:
@@ -61,8 +61,10 @@ class OrderService(BaseService[Orders]):
                         )
                     )
 
-                # Atomically adjust inventory via contract
-                product.stock_quantity -= item_in.quantity
+                await self.inventory_service.adjust_stock(
+                    product_id=item_in.product_id,
+                    quantity_delta=-item_in.quantity,
+                )
 
                 subtotal = product.price * item_in.quantity
                 total_amount += subtotal
@@ -119,7 +121,7 @@ class OrderService(BaseService[Orders]):
                 },
             )
 
-        return order
+        return await self.get(id=order_id)
 
 
 class OrderNotificationListener:

@@ -48,10 +48,7 @@ class OrderRouter(BaseRouter[OrderCreate, OrderUpdate]):
     tags: ClassVar[list[str]] = ["Orders"]
 
     def get_route_dependencies(self, route_key: RouteKey, action: str) -> list[Any]:
-        """Automatically bind RBAC scopes generated for the Orders domain.
-        
-        Uses BaseRouter's built-in HasScopes(action) without hard-coding auth dependencies.
-        """
+        """Automatically bind RBAC scopes generated for the Orders domain."""
         return [HasScopes(action)]
 
     async def create_endpoint(self, data_in: OrderCreate, service: OrderService) -> ResponseWrapper:
@@ -91,7 +88,7 @@ order_router_instance = OrderRouter()
 async def update_order_status(
     id: uuid.UUID,
     status_in: OrderStatusUpdate,
-    service: Inject[OrderService] = None,
+    service: Inject[OrderService],
 ):
     """Admin-facing endpoint updating order status and emitting post-commit events."""
     updated_order = await service.update_status(order_id=id, data_in=status_in)

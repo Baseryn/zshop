@@ -99,7 +99,7 @@ class ProductService(BaseService[Products]):
         # Update product record with new image URL
         product.image_url = file_url
         await self._safe_commit()
-        return product
+        return await self.get(id=product_id)
 
     async def adjust_stock(self, product_id: Any, quantity_delta: int) -> Products:
         """Atomically adjust stock count; raises ValidationError on deficit."""

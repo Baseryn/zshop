@@ -51,11 +51,8 @@ class CategoryRouter(BaseRouter[CategoryCreate, CategoryUpdate]):
 
 class ProductRouter(BaseRouter[ProductCreate, ProductUpdate]):
     """Advanced Product Router.
-    
-    Showcases:
-    - Keyset Cursor Pagination via CursorPagination.
-    - Lightweight Lookup endpoint via lookup_schema = ProductLookupResponse.
-    - Dynamic Context-Aware JSON Schema generation (?schema=true).
+
+    Showcases Keyset Cursor Pagination, lightweight lookup projections, and dynamic schema exposure.
     """
 
     model = Products
@@ -67,11 +64,11 @@ class ProductRouter(BaseRouter[ProductCreate, ProductUpdate]):
     pagination_class = CursorPagination
     prefix = "/products"
     tags: ClassVar = ["Products"]
-    expose_schemas = True  # Allows clients to fetch /products?schema=true
+    expose_schemas = True
 
     def get_route_dependencies(self, route_key: RouteKey, action: str) -> list[Any]:
         """Allow public access for browsing; require permissions for mutations."""
-        if route_key in (RouteKey.GET, RouteKey.GET_ALL, RouteKey.SEARCH, RouteKey.LOOKUP):
+        if route_key in (RouteKey.GET_ALL, RouteKey.SEARCH, RouteKey.LOOKUP):
             return []
         return super().get_route_dependencies(route_key, action)
 
@@ -79,7 +76,7 @@ class ProductRouter(BaseRouter[ProductCreate, ProductUpdate]):
 category_router_instance = CategoryRouter()
 product_router_instance = ProductRouter()
 
-# Attach specialized non-CRUD routes directly to the generated APIRouter
+
 @product_router_instance.router.post(
     "/{id}/image",
     status_code=status.HTTP_200_OK,
@@ -88,8 +85,8 @@ product_router_instance = ProductRouter()
 )
 async def upload_product_image(
     id: uuid.UUID,
+    service: Inject[ProductService],
     file: UploadFile = File(...),
-    service: Inject[ProductService] = None,
 ):
     """Upload product image passing through Magic-Bytes inspection and file validation."""
     updated_product = await service.upload_product_image(product_id=id, file=file)
