@@ -1,0 +1,4 @@
+fastapi-zcore-framework[all]
+uvicorn>=0.22.0
+
+asyncpg>=0.29.0
