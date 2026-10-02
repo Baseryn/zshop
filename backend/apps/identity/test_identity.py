@@ -7,9 +7,10 @@ and RBAC permissions using direct ZTestClient context blocks.
 import uuid
 
 import pytest
-from main import app
 from zcore import now
 from zcore.testing import ZTestClient
+
+from main import app
 
 
 @pytest.mark.asyncio

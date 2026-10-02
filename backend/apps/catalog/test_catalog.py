@@ -8,8 +8,9 @@ import io
 import uuid
 
 import pytest
-from main import app
 from zcore.testing import ZTestClient
+
+from main import app
 
 
 @pytest.mark.asyncio
