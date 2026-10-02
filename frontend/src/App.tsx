@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { Header } from "@/components/common/Header";
 import { ScopeGate } from "@/components/common/ScopeGate";
+import { ZCoreDock } from "@/components/devtools/ZCoreDock";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { KeyRound, ShieldAlert, CheckCircle2, Lock } from "lucide-react";
@@ -15,7 +16,7 @@ export default function App() {
   }, [fetchMe]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col pb-12">
       <Header />
 
       <main className="container max-w-screen-xl flex-1 py-8 px-4 sm:px-8 space-y-6">
@@ -107,6 +108,8 @@ export default function App() {
           </CardContent>
         </Card>
       </main>
+
+      <ZCoreDock />
     </div>
   );
 }
