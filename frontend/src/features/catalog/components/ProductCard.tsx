@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Product } from "@/types/catalog";
 import { useAuthStore } from "@/stores/authStore";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -19,6 +20,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
+  const navigate = useNavigate();
   const { user } = useAuthStore();
   const [inspectOpen, setInspectOpen] = useState(false);
 
@@ -33,7 +35,10 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   return (
     <Card className="flex flex-col justify-between border-border/70 bg-card/60 backdrop-blur-sm hover:border-brand-500/40 transition-all duration-200 overflow-hidden group">
       <div>
-        <div className="relative aspect-video w-full bg-secondary/30 flex items-center justify-center border-b border-border/40 overflow-hidden">
+        <div
+          onClick={() => navigate(`/product/${product.id}`)}
+          className="relative aspect-video w-full bg-secondary/30 flex items-center justify-center border-b border-border/40 overflow-hidden cursor-pointer"
+        >
           {product.image_url ? (
             <img
               src={product.image_url}
@@ -66,7 +71,10 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
         <CardHeader className="p-4 pb-2">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="font-semibold text-base tracking-tight text-foreground line-clamp-1">
+            <h3
+              onClick={() => navigate(`/product/${product.id}`)}
+              className="font-semibold text-base tracking-tight text-foreground line-clamp-1 cursor-pointer hover:text-brand-500 transition-colors"
+            >
               {product.name}
             </h3>
           </div>
