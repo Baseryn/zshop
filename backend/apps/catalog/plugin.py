@@ -6,7 +6,10 @@ from fastapi import FastAPI
 from zcore import Plugin, StorageProvider, container
 from zcore.storage import LocalStorageProvider
 
+from contracts.catalog import ProductContract
+
 from .routers import category_router_instance, product_router_instance
+from .services import ProductService
 
 
 class CatalogPlugin(Plugin):
@@ -18,6 +21,9 @@ class CatalogPlugin(Plugin):
 
     def setup(self, app: FastAPI) -> None:
         """Register the storage provider and mount domain routers."""
+
+        container.register_scoped(ProductContract, ProductService)
+
         # Ensure a singleton StorageProvider is available in the IoC Container
         container.register_singleton(
             StorageProvider,
