@@ -77,6 +77,26 @@ class OrderRouter(BaseRouter[OrderCreate, OrderUpdate]):
 order_router_instance = OrderRouter()
 
 
+# Current authenticated customer's personal orders endpoint
+@order_router_instance.router.get(
+    "/me",
+    status_code=status.HTTP_200_OK,
+    response_model=ResponseWrapper[list[OrderResponse]],
+    dependencies=[Depends(HasScopes("orders:view"))],
+    summary="Get Current User's Orders",
+)
+async def get_my_orders(
+    service: Inject[OrderService],
+):
+    """Retrieve orders placed specifically by the current authenticated user."""
+    user_id = ctx.user_id
+    if not user_id:
+        raise ForbiddenError(message="Authentication required to view orders.")
+
+    user_orders = await service.repository.get_list(Orders.user_id == user_id)
+    return ResponseWrapper(data=user_orders)
+
+
 # Administrative Status Transition Endpoint protected by domain scope
 @order_router_instance.router.patch(
     "/{id}/status",
