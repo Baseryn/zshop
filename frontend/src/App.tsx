@@ -16,12 +16,11 @@ function AppLayout() {
   useSSE();
 
   useEffect(() => {
-    document.documentElement.classList.add("dark");
     fetchMe();
   }, [fetchMe]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col pb-16">
+    <div className="min-h-screen bg-background text-foreground flex flex-col pb-20">
       <Header />
 
       <main className="container max-w-screen-2xl flex-1 py-8 px-4 sm:px-8">

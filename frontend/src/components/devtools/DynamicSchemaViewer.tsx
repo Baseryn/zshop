@@ -22,36 +22,36 @@ export function DynamicSchemaViewer() {
   };
 
   return (
-    <div className="space-y-3 text-xs">
-      <div className="flex items-center justify-between pb-2 border-b border-border/40">
+    <div className="space-y-3">
+      <div className="flex items-center justify-between pb-2 border-b">
         <div className="flex items-center gap-2">
-          <Code2 className="w-4 h-4 text-brand-500" />
-          <span className="text-foreground text-[11px]">Dynamic Model Schema (GET /catalog/products/?schema=true)</span>
+          <Code2 className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium">Dynamic Model Schema (GET /catalog/products/?schema=true)</span>
         </div>
         <Button
           variant="outline"
           size="sm"
           onClick={fetchSchema}
           disabled={loading}
-          className="h-7 text-xs gap-1 border-border bg-secondary/30"
+          className="h-8 text-xs gap-1.5 rounded-lg"
         >
-          <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin text-brand-500" : ""}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-primary" : ""}`} />
           <span>Fetch Dynamic Schema</span>
         </Button>
       </div>
 
       {error && (
-        <div className="p-3 bg-destructive/20 border border-destructive text-destructive-foreground rounded text-[11px]">
+        <div className="p-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-xl text-xs">
           {error}
         </div>
       )}
 
       {schema ? (
-        <pre className="bg-zinc-950 p-3 rounded-lg border border-border/60 text-cyber-500 overflow-x-auto text-[11px] leading-relaxed max-h-56">
+        <pre className="bg-secondary/40 p-4 rounded-xl border text-foreground font-mono text-xs leading-relaxed max-h-60 overflow-x-auto">
           {JSON.stringify(schema, null, 2)}
         </pre>
       ) : (
-        <div className="p-8 text-center text-muted-foreground font-sans text-xs">
+        <div className="p-8 text-center text-muted-foreground text-xs">
           Click "Fetch Dynamic Schema" to inspect the JSON Schema generated on-the-fly by ZCore's BaseRouter.
         </div>
       )}

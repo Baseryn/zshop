@@ -1,7 +1,7 @@
 import { ResponseWrapper, ApiErrorResponse } from "@/types/api";
 import { useDevToolsStore } from "@/stores/devtoolsStore";
 
-const BASE_URL = "/api";
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 export class ApiError extends Error {
   status: number;
@@ -31,7 +31,8 @@ export async function apiClient<T>(
   }
 
   const startTime = performance.now();
-  const url = `${BASE_URL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
+  const normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const url = `${API_BASE_URL}${normalizedEndpoint}`;
 
   try {
     const response = await fetch(url, {

@@ -43,7 +43,7 @@ class RealtimeNotificationService:
 
         payload_dict = notification.model_dump(mode="json")
         await self.stream_manager.publish(user_id=user_id, data=payload_dict)
-        logger.info("Dispatched real-time notification to user", user_id=str(user_id), event=event)
+        logger.info("Dispatched real-time notification to user", user_id=str(user_id))
 
     async def stream_user_events(
         self,
