@@ -17,7 +17,7 @@ export function CustomerOrdersView() {
   const fetchOrders = () => {
     setLoading(true);
     ordersApi
-      .getOrders()
+      .getMyOrders()
       .then(setOrders)
       .catch(() => setOrders([]))
       .finally(() => setLoading(false));

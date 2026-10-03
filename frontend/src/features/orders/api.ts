@@ -13,6 +13,11 @@ export const ordersApi = {
     return await apiClient<OrderResponse>(`/checkout/orders/${id}`);
   },
 
+  getMyOrders: async (): Promise<OrderResponse[]> => {
+    const res = await apiClient<any>("/checkout/orders/me");
+    return Array.isArray(res) ? res : res.items || res.data || [];
+  },
+
   getOrders: async (): Promise<OrderResponse[]> => {
     const res = await apiClient<any>("/checkout/orders/");
     return Array.isArray(res) ? res : res.items || [];
