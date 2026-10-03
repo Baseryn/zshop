@@ -65,7 +65,7 @@ export function CatalogView() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
       <div className="md:col-span-1">
-        <div className="p-4 rounded-xl border border-border/60 bg-card/40 backdrop-blur-md sticky top-20">
+        <div className="p-5 rounded-2xl border bg-card/60 backdrop-blur-md sticky top-24 shadow-sm">
           <CatalogFilters
             categories={categories}
             searchQuery={searchQuery}
@@ -79,44 +79,44 @@ export function CatalogView() {
         </div>
       </div>
 
-      <div className="md:col-span-3 space-y-4">
-        <div className="flex items-center justify-between text-xs text-muted-foreground pb-2 border-b border-border/40">
+      <div className="md:col-span-3 space-y-5">
+        <div className="flex items-center justify-between text-xs text-muted-foreground pb-2 border-b font-medium">
           <span>SHOWING {products.length} PRODUCTS</span>
           <Button
             variant="ghost"
             size="sm"
             onClick={loadProducts}
             disabled={loading}
-            className="h-7 text-xs gap-1 hover:text-brand-500"
+            className="h-8 text-xs gap-1.5 hover:text-primary rounded-lg"
           >
-            <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin text-brand-500" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-primary" : ""}`} />
             Refresh Catalog
           </Button>
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="space-y-3 p-4 rounded-xl border border-border/40 bg-card/20">
-                <Skeleton className="aspect-video w-full rounded-lg" />
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
-                <Skeleton className="h-8 w-full mt-4" />
+              <div key={i} className="space-y-3 p-5 rounded-2xl border bg-card shadow-sm">
+                <Skeleton className="aspect-video w-full rounded-xl" />
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-9 w-full mt-4 rounded-lg" />
               </div>
             ))}
           </div>
         ) : products.length === 0 ? (
-          <div className="p-12 text-center border border-dashed border-border/60 rounded-xl space-y-3">
-            <Package className="w-10 h-10 text-muted-foreground mx-auto" />
-            <div className="text-sm text-foreground font-semibold">No products found</div>
-            <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+          <div className="p-16 text-center border border-dashed rounded-2xl space-y-3 bg-card/40">
+            <Package className="w-12 h-12 text-muted-foreground mx-auto" />
+            <div className="text-base font-semibold text-foreground">No products found</div>
+            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
               No products match your active search filters, or no products have been seeded into the database yet.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {products.map((product) => (
-              <ProductCard  key={product.id}  product={product}  onAddToCart={(prod) => addItem(prod, 1)}/>
+              <ProductCard key={product.id} product={product} onAddToCart={(prod) => addItem(prod, 1)} />
             ))}
           </div>
         )}
