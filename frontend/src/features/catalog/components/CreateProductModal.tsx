@@ -142,7 +142,9 @@ export function CreateProductModal({ categories, onProductCreated }: CreateProdu
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground">Product Name *</label>
+              <div className="flex items-center justify-between h-5">
+                <label className="text-xs font-medium text-foreground">Product Name *</label>
+              </div>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -153,12 +155,12 @@ export function CreateProductModal({ categories, onProductCreated }: CreateProdu
             </div>
 
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between h-5">
                 <label className="text-xs font-medium text-foreground">SKU Code *</label>
                 <button
                   type="button"
                   onClick={generateSku}
-                  className="text-[11px] text-primary hover:underline font-medium"
+                  className="text-[11px] text-primary hover:underline font-medium leading-none"
                 >
                   Generate SKU
                 </button>

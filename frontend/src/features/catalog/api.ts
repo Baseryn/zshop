@@ -66,6 +66,13 @@ export const catalogApi = {
     });
   },
 
+  updateCategory: async (id: string, data: Partial<CreateCategoryPayload>): Promise<Category> => {
+    return await apiClient<Category>(`/catalog/categories/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  },
+
   deleteCategory: async (id: string): Promise<void> => {
     await apiClient<void>(`/catalog/categories/${id}`, {
       method: "DELETE",

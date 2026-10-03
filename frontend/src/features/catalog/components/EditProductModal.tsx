@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, ChangeEvent } from "react";
 import { catalogApi } from "../api";
 import { Category, Product } from "@/types/catalog";
+import { getImageUrl } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -237,7 +238,7 @@ export function EditProductModal({
             />
             {imagePreview ? (
               <div className="relative w-32 h-32 rounded-xl overflow-hidden border bg-secondary/30">
-                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                <img src={getImageUrl(imagePreview)} alt="Preview" className="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={removeImage}
