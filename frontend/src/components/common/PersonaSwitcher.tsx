@@ -20,7 +20,7 @@ export function PersonaSwitcher() {
   return (
     <div className="flex items-center gap-2">
       <DropdownMenu>
-        <DropdownMenuTrigger>
+        <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
             size="sm"
