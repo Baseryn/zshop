@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Product } from "@/types/catalog";
 import { useAuthStore } from "@/stores/authStore";
+import { getImageUrl } from "@/lib/api-client";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,7 +44,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         >
           {product.image_url ? (
             <img
-              src={product.image_url}
+              src={getImageUrl(product.image_url)}
               alt={product.name}
               className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
@@ -134,17 +135,17 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
               <span>Inspect</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg rounded-2xl">
-            <DialogHeader>
+          <DialogContent className="max-w-lg w-[calc(100vw-2rem)] rounded-2xl p-6 overflow-hidden">
+            <DialogHeader className="pb-2">
               <DialogTitle className="text-base font-semibold flex items-center gap-2">
                 <span>Zchema Raw Payload Inspection</span>
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-3">
+            <div className="space-y-3 min-w-0">
               <div className="text-xs text-muted-foreground">
                 Payload returned for: <span className="text-primary font-bold">{user ? user.email : "Guest"}</span>
               </div>
-              <pre className="bg-muted p-4 rounded-xl border font-mono text-xs leading-relaxed max-h-72 overflow-x-auto text-foreground">
+              <pre className="bg-muted p-4 rounded-xl border font-mono text-xs leading-relaxed max-h-64 overflow-auto text-foreground w-full whitespace-pre break-words">
                 {JSON.stringify(product, null, 2)}
               </pre>
               <p className="text-xs text-muted-foreground">
@@ -158,12 +159,12 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
         <Button
           onClick={() => onAddToCart && onAddToCart(product)}
-          disabled={product.stock_quantity <= 0}
+          disabled={product.stock_quantity <= 0 || !user}
           size="sm"
           className="flex-1 h-9 text-xs gap-1.5 rounded-lg shadow-sm"
         >
           <ShoppingCart className="w-4 h-4" />
-          <span>Add to Cart</span>
+          <span>{!user ? "Login to Buy" : "Add to Cart"}</span>
         </Button>
       </CardFooter>
     </Card>

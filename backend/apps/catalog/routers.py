@@ -37,14 +37,15 @@ class CategoryRouter(BaseRouter[CategoryCreate, CategoryUpdate]):
     create_schema = CategoryCreate
     update_schema = CategoryUpdate
     schema_out = CategoryResponse
+    lookup_schema = CategoryResponse
     service = CategoryService
     pagination_class = PageNumberPagination
     prefix = "/categories"
     tags: ClassVar = ["Categories"]
 
     def get_route_dependencies(self, route_key: RouteKey, action: str) -> list[Any]:
-        """Make reading categories public; restrict modifications to RBAC."""
-        if route_key in (RouteKey.GET, RouteKey.GET_ALL):
+        """Make category browsing public; restrict mutations to RBAC."""
+        if route_key in (RouteKey.GET, RouteKey.GET_ALL, RouteKey.SEARCH, RouteKey.LOOKUP):
             return []
         return super().get_route_dependencies(route_key, action)
 
@@ -67,8 +68,8 @@ class ProductRouter(BaseRouter[ProductCreate, ProductUpdate]):
     expose_schemas = True
 
     def get_route_dependencies(self, route_key: RouteKey, action: str) -> list[Any]:
-        """Allow public access for browsing; require permissions for mutations."""
-        if route_key in (RouteKey.GET_ALL, RouteKey.SEARCH, RouteKey.LOOKUP):
+        """Allow public access for browsing and listview; mutations require RBAC."""
+        if route_key in (RouteKey.GET, RouteKey.GET_ALL, RouteKey.SEARCH, RouteKey.LOOKUP):
             return []
         return super().get_route_dependencies(route_key, action)
 

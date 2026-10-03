@@ -3,6 +3,15 @@ import { useDevToolsStore } from "@/stores/devtoolsStore";
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
+export function getImageUrl(url?: string | null): string {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("blob:")) {
+    return url;
+  }
+  const backendBase = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, "") || "http://127.0.0.1:8000";
+  return `${backendBase}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
 export class ApiError extends Error {
   status: number;
   meta?: Record<string, any>;

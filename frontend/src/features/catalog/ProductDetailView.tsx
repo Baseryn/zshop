@@ -4,6 +4,7 @@ import { Product } from "@/types/catalog";
 import { catalogApi } from "./api";
 import { useAuthStore } from "@/stores/authStore";
 import { useCartStore } from "@/stores/cartStore";
+import { getImageUrl } from "@/lib/api-client";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -107,7 +108,7 @@ export function ProductDetailView() {
         <div className="space-y-4">
           <div className="relative aspect-square w-full bg-secondary/30 rounded-2xl border flex items-center justify-center overflow-hidden">
             {product.image_url ? (
-              <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
+              <img src={getImageUrl(product.image_url)} alt={product.name} className="h-full w-full object-cover" />
             ) : (
               <Box className="w-20 h-20 text-muted-foreground/60" />
             )}
@@ -215,11 +216,11 @@ export function ProductDetailView() {
 
           <Button
             onClick={() => addItem(product, 1)}
-            disabled={product.stock_quantity <= 0}
+            disabled={product.stock_quantity <= 0 || !user}
             className="w-full h-11 text-sm font-semibold gap-2 rounded-xl shadow-sm"
           >
             <ShoppingCart className="w-4 h-4" />
-            <span>Add to Cart</span>
+            <span>{!user ? "Authentication Required to Purchase" : "Add to Cart"}</span>
           </Button>
         </div>
       </div>

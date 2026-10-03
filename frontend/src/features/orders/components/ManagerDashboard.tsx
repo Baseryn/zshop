@@ -8,6 +8,7 @@ import { ScopeGate } from "@/components/common/ScopeGate";
 import { BroadcastModal } from "@/features/realtime/components/BroadcastModal";
 import { CreateProductModal } from "@/features/catalog/components/CreateProductModal";
 import { CreateCategoryModal } from "@/features/catalog/components/CreateCategoryModal";
+import { EditCategoryModal } from "@/features/catalog/components/EditCategoryModal";
 import { ProductManagementTable } from "@/features/catalog/components/ProductManagementTable";
 import {
   Table,
@@ -28,7 +29,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { RefreshCw, ShoppingBag, Lock, Truck, Package, FolderTree, ShieldAlert } from "lucide-react";
+import { RefreshCw, ShoppingBag, Lock, Truck, Package, FolderTree, ShieldAlert, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -50,6 +51,9 @@ export function ManagerDashboard() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [deletingCatId, setDeletingCatId] = useState<string | null>(null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editCategoryOpen, setEditCategoryOpen] = useState(false);
 
   const isAuthorizedManager = Boolean(
     user?.is_superuser || user?.is_staff || user?.scopes?.includes("orders:update")
@@ -99,6 +103,30 @@ export function ManagerDashboard() {
       });
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handleEditCategory = (cat: Category) => {
+    setEditingCategory(cat);
+    setEditCategoryOpen(true);
+  };
+
+  const handleDeleteCategory = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete category '${name}'?`)) return;
+
+    setDeletingCatId(id);
+    try {
+      await catalogApi.deleteCategory(id);
+      toast.success("Category Deleted", {
+        description: `Category '${name}' deleted successfully.`,
+      });
+      loadData();
+    } catch (err: any) {
+      toast.error("Delete Failed", {
+        description: err.message || "Failed to delete category.",
+      });
+    } finally {
+      setDeletingCatId(null);
     }
   };
 
@@ -288,6 +316,7 @@ export function ManagerDashboard() {
                         <TableHead className="text-xs uppercase font-semibold">URL Slug</TableHead>
                         <TableHead className="text-xs uppercase font-semibold">Description</TableHead>
                         <TableHead className="text-xs uppercase font-semibold">Status</TableHead>
+                        <TableHead className="text-xs uppercase font-semibold text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -301,6 +330,27 @@ export function ManagerDashboard() {
                               Active
                             </Badge>
                           </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                onClick={() => handleEditCategory(c)}
+                                className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-lg"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                disabled={deletingCatId === c.id}
+                                onClick={() => handleDeleteCategory(c.id, c.name)}
+                                className="h-8 w-8 text-muted-foreground hover:text-destructive rounded-lg"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -311,6 +361,13 @@ export function ManagerDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <EditCategoryModal
+        category={editingCategory}
+        open={editCategoryOpen}
+        onOpenChange={setEditCategoryOpen}
+        onCategoryUpdated={loadData}
+      />
     </ScopeGate>
   );
 }

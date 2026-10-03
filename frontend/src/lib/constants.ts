@@ -29,7 +29,7 @@ export const SEED_PERSONAS: Record<string, PersonaConfig> = {
     password: "CustomerSecret123!",
     badgeVariant: "outline",
     badgeClass: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-    description: "Tests Zchema data pruning (cost_price is hidden)",
+    description: "Evaluated by lookup & view scopes + Zchema data pruning",
   },
   guest: {
     id: "guest",

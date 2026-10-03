@@ -5,6 +5,7 @@ registers domain plugins with automatic topological dependency resolution,
 and configures request middlewares and global exception handlers.
 """
 
+import os
 import sys
 from pathlib import Path
 
@@ -13,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from zcore import (
     Kernel,
     db_manager,
@@ -72,7 +74,15 @@ app.add_middleware(
     expose_headers=["x-request-id"],
 )
 
-# 8. Register Unified Exception Handlers (ResponseWrapper formatting)
+# 8. Mount Static Storage Directory for Uploaded Assets
+os.makedirs(settings.STORAGE_PATH, exist_ok=True)
+app.mount(
+    settings.STORAGE_URL_PREFIX,
+    StaticFiles(directory=settings.STORAGE_PATH),
+    name="storage",
+)
+
+# 9. Register Unified Exception Handlers (ResponseWrapper formatting)
 register_exception_handlers(app)
 
 
