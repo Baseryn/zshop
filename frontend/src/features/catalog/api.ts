@@ -19,7 +19,10 @@ export const catalogApi = {
   },
 
   getCategories: async (): Promise<Category[]> => {
-    const res = await apiClient<any>("/catalog/categories/");
+    const res = await apiClient<any>("/catalog/categories/lookup", {
+      method: "POST",
+      body: JSON.stringify({ size: 100 }),
+    });
     return Array.isArray(res) ? res : res?.items || res?.data || [];
   },
 
