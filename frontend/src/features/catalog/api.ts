@@ -33,6 +33,15 @@ export const catalogApi = {
     });
   },
 
+  uploadProductImage: async (id: string, file: File): Promise<Product> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return await apiClient<Product>(`/catalog/products/${id}/image`, {
+      method: "POST",
+      body: formData,
+    });
+  },
+
   deleteProduct: async (id: string): Promise<void> => {
     await apiClient<void>(`/catalog/products/${id}`, {
       method: "DELETE",

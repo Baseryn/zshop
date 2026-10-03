@@ -28,8 +28,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { RefreshCw, ShoppingBag, Lock, Truck, Package, FolderTree } from "lucide-react";
+import { RefreshCw, ShoppingBag, Lock, Truck, Package, FolderTree, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const STATUS_OPTIONS: OrderStatus[] = [
   "pending",
@@ -42,6 +43,7 @@ const STATUS_OPTIONS: OrderStatus[] = [
 
 export function ManagerDashboard() {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("orders");
   const [orders, setOrders] = useState<OrderResponse[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -49,7 +51,13 @@ export function ManagerDashboard() {
   const [loading, setLoading] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
+  const isAuthorizedManager = Boolean(
+    user?.is_superuser || user?.is_staff || user?.scopes?.includes("orders:update")
+  );
+
   const loadData = useCallback(async () => {
+    if (!isAuthorizedManager) return;
+
     setLoading(true);
     try {
       const [ordersData, categoriesData, productsData] = await Promise.all([
@@ -65,13 +73,17 @@ export function ManagerDashboard() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthorizedManager]);
 
   useEffect(() => {
-    if (user?.is_superuser || user?.scopes.includes("orders:view")) {
+    if (isAuthorizedManager) {
       loadData();
+    } else {
+      setOrders([]);
+      setProducts([]);
+      setCategories([]);
     }
-  }, [user, loadData]);
+  }, [isAuthorizedManager, loadData]);
 
   const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
     setUpdatingId(orderId);
@@ -95,56 +107,69 @@ export function ManagerDashboard() {
   const safeCategories = categories || [];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
-              <Truck className="w-6 h-6 text-amber-500" />
-              Store Operations & Admin Hub
-            </h2>
-            <Badge variant="secondary" className="text-xs rounded-full border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 font-mono">
-              RBAC PROTECTED
-            </Badge>
+    <ScopeGate
+      scope="orders:update"
+      fallback={
+        <Card className="border-destructive/30 bg-destructive/5 text-center p-16 space-y-5 rounded-2xl shadow-sm max-w-2xl mx-auto my-12">
+          <div className="w-14 h-14 rounded-full bg-destructive/10 border border-destructive/20 text-destructive flex items-center justify-center mx-auto">
+            <Lock className="w-7 h-7" />
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Manage orders, real-time inventory, categories, and system-wide broadcasts with ZCore RBAC.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          <CreateCategoryModal onCategoryCreated={loadData} />
-          <CreateProductModal categories={safeCategories} onProductCreated={loadData} />
-          <BroadcastModal />
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={loadData}
-            disabled={loading}
-            className="h-9 text-xs gap-1.5 rounded-lg"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-primary" : ""}`} />
-            <span>Reload</span>
-          </Button>
-        </div>
-      </div>
-
-      <ScopeGate
-        scope="orders:view"
-        fallback={
-          <Card className="border-destructive/30 bg-destructive/5 text-center p-12 space-y-4 rounded-2xl shadow-sm">
-            <div className="w-12 h-12 rounded-full bg-destructive/10 border border-destructive/20 text-destructive flex items-center justify-center mx-auto">
-              <Lock className="w-6 h-6" />
-            </div>
-            <CardTitle className="text-base text-destructive font-bold">403 Forbidden - Scope Required</CardTitle>
-            <CardDescription className="text-xs max-w-md mx-auto leading-relaxed">
-              Your active persona lacks operational permissions.
-              Switch to <span className="text-amber-500 font-bold">StoreManager</span> or <span className="text-red-500 font-bold">SuperAdmin</span> via the Persona Switcher in the top header.
+          <div className="space-y-1.5">
+            <CardTitle className="text-xl text-destructive font-bold flex items-center justify-center gap-2">
+              <ShieldAlert className="w-5 h-5" />
+              <span>403 Forbidden — Restricted Area</span>
+            </CardTitle>
+            <CardDescription className="text-sm max-w-md mx-auto leading-relaxed text-muted-foreground">
+              This operations hub is exclusively reserved for staff and managers.
+              Customer accounts do not have permission to view or manage store operations.
             </CardDescription>
-          </Card>
-        }
-      >
+          </div>
+          <div className="pt-2 flex justify-center gap-3">
+            <Button variant="outline" size="sm" onClick={() => navigate("/")} className="rounded-lg text-xs">
+              Return to Catalog
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => navigate("/my-orders")} className="rounded-lg text-xs">
+              View My Orders
+            </Button>
+          </div>
+        </Card>
+      }
+    >
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+                <Truck className="w-6 h-6 text-amber-500" />
+                Store Operations & Admin Hub
+              </h2>
+              <Badge variant="secondary" className="text-xs rounded-full border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 font-mono">
+                RBAC PROTECTED
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Manage orders, real-time inventory, categories, and system-wide broadcasts with ZCore RBAC.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <CreateCategoryModal onCategoryCreated={loadData} />
+            <CreateProductModal categories={safeCategories} onProductCreated={loadData} />
+            <BroadcastModal />
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={loadData}
+              disabled={loading}
+              className="h-9 text-xs gap-1.5 rounded-lg"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-primary" : ""}`} />
+              <span>Reload</span>
+            </Button>
+          </div>
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="h-10 p-1 rounded-xl">
             <TabsTrigger value="orders" className="text-xs gap-2 rounded-lg">
@@ -236,7 +261,7 @@ export function ManagerDashboard() {
           </TabsContent>
 
           <TabsContent value="products" className="mt-0">
-            <ProductManagementTable products={safeProducts} onRefresh={loadData} />
+            <ProductManagementTable products={safeProducts} categories={safeCategories} onRefresh={loadData} />
           </TabsContent>
 
           <TabsContent value="categories" className="mt-0">
@@ -285,7 +310,7 @@ export function ManagerDashboard() {
             </Card>
           </TabsContent>
         </Tabs>
-      </ScopeGate>
-    </div>
+      </div>
+    </ScopeGate>
   );
 }
