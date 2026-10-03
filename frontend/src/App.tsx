@@ -1,12 +1,16 @@
 import { useEffect } from "react";
 import { useAuthStore } from "@/stores/authStore";
+import { useSSE } from "@/hooks/useSSE";
 import { Header } from "@/components/common/Header";
 import { ZCoreDock } from "@/components/devtools/ZCoreDock";
 import { CatalogView } from "@/features/catalog/CatalogView";
 import { CartDrawer } from "@/features/orders/components/CartDrawer";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function App() {
   const { fetchMe } = useAuthStore();
+  
+  useSSE();
 
   useEffect(() => {
     document.documentElement.classList.add("dark");
@@ -38,6 +42,8 @@ export default function App() {
       <CartDrawer />
 
       <ZCoreDock />
+
+      <Toaster position="top-right" richColors />
     </div>
   );
 }

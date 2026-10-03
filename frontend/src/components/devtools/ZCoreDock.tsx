@@ -6,6 +6,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Terminal, ChevronUp, ChevronDown, Activity, Code, Shield } from "lucide-react";
+import { SSEMonitor } from "./SSEMonitor";
+import { Radio } from "lucide-react";
 
 export function ZCoreDock() {
   const { isOpen, toggleOpen, activeTab, setActiveTab, metrics } = useDevToolsStore();
@@ -50,6 +52,10 @@ export function ZCoreDock() {
                     <Code className="w-3 h-3 text-manager-500" />
                     Dynamic Schema
                   </TabsTrigger>
+                  <TabsTrigger value="sse" className="text-xs font-mono gap-1.5 h-7">
+                    <Radio className="w-3 h-3 text-emerald-400" />
+                    SSE Stream
+                  </TabsTrigger>
                 </TabsList>
 
                 <div className="text-[11px] font-mono text-muted-foreground hidden sm:block">
@@ -66,6 +72,9 @@ export function ZCoreDock() {
                 </TabsContent>
                 <TabsContent value="schema" className="mt-0 focus-visible:outline-none">
                   <DynamicSchemaViewer />
+                </TabsContent>
+                <TabsContent value="sse" className="mt-0 focus-visible:outline-none">
+                  <SSEMonitor />
                 </TabsContent>
               </div>
             </Tabs>

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { RequestMetric } from "@/types/api";
 
-export type DevToolsTab = "context" | "network" | "schema";
+export type DevToolsTab = "context" | "network" | "schema" | "sse";
 
 interface DevToolsState {
   isOpen: boolean;
