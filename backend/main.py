@@ -12,6 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from zcore import (
     Kernel,
     db_manager,
@@ -62,6 +63,14 @@ kernel.setup(app)
 # - ScopedDependencyMiddleware: Allocates request-scoped IoC boundaries and AsyncSessions
 app.add_middleware(RequestLogMiddleware)
 app.add_middleware(ScopedDependencyMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["x-request-id"],
+)
 
 # 8. Register Unified Exception Handlers (ResponseWrapper formatting)
 register_exception_handlers(app)

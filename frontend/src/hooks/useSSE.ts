@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useRealtimeStore } from "@/stores/realtimeStore";
+import { API_BASE_URL } from "@/lib/api-client";
 import { toast } from "sonner";
 
 export function useSSE() {
@@ -22,7 +23,7 @@ export function useSSE() {
     const connect = () => {
       setStatus("connecting");
 
-      const streamUrl = `/api/realtime/stream?token=${encodeURIComponent(token)}`;
+      const streamUrl = `${API_BASE_URL}/realtime/stream?token=${encodeURIComponent(token)}`;
       const es = new EventSource(streamUrl);
       eventSourceRef.current = es;
 
