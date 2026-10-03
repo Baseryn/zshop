@@ -7,8 +7,9 @@ customer ownership isolation, and fulfillment state transitions.
 import uuid
 
 import pytest
-from main import app
 from zcore.testing import ZTestClient
+
+from main import app
 
 
 async def _create_test_product(

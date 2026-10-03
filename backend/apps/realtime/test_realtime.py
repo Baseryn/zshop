@@ -7,9 +7,9 @@ and decoupled EventDispatcher pub/sub notifications.
 import uuid
 
 import pytest
-from main import app
-from zcore import Security
 from zcore.testing import ZTestClient
+
+from main import app
 
 
 @pytest.mark.asyncio
@@ -47,6 +47,7 @@ async def test_sse_stream_initial_handshake_and_ping() -> None:
 
     subscriber_id = uuid.uuid4()
     from zcore import container
+
     from apps.realtime.services import RealtimeNotificationService
 
     service = container.resolve(RealtimeNotificationService)
