@@ -216,11 +216,11 @@ export function ProductDetailView() {
 
           <Button
             onClick={() => addItem(product, 1)}
-            disabled={product.stock_quantity <= 0}
+            disabled={product.stock_quantity <= 0 || !user}
             className="w-full h-11 text-sm font-semibold gap-2 rounded-xl shadow-sm"
           >
             <ShoppingCart className="w-4 h-4" />
-            <span>Add to Cart</span>
+            <span>{!user ? "Authentication Required to Purchase" : "Add to Cart"}</span>
           </Button>
         </div>
       </div>

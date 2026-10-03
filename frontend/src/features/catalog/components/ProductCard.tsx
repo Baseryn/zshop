@@ -159,12 +159,12 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
         <Button
           onClick={() => onAddToCart && onAddToCart(product)}
-          disabled={product.stock_quantity <= 0}
+          disabled={product.stock_quantity <= 0 || !user}
           size="sm"
           className="flex-1 h-9 text-xs gap-1.5 rounded-lg shadow-sm"
         >
           <ShoppingCart className="w-4 h-4" />
-          <span>Add to Cart</span>
+          <span>{!user ? "Login to Buy" : "Add to Cart"}</span>
         </Button>
       </CardFooter>
     </Card>

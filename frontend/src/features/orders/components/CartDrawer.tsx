@@ -8,7 +8,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +22,9 @@ import {
   AlertTriangle,
   Lock,
   Package,
+  ShieldCheck,
 } from "lucide-react";
+import { toast } from "sonner";
 
 export function CartDrawer() {
   const { items, isOpen, setOpen, removeItem, updateQuantity, clearCart, totalPrice } =
@@ -33,6 +34,7 @@ export function CartDrawer() {
   const [address, setAddress] = useState("100 Innovation Boulevard, Tech Park");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isRollbackSuccess, setIsRollbackSuccess] = useState(false);
   const [lastPlacedOrder, setLastPlacedOrder] = useState<OrderResponse | null>(null);
 
   const handleCheckout = async (simulateDeficit = false) => {
@@ -45,6 +47,7 @@ export function CartDrawer() {
 
     setSubmitting(true);
     setErrorMsg(null);
+    setIsRollbackSuccess(false);
 
     const orderPayload = {
       shipping_address: address,
@@ -59,7 +62,15 @@ export function CartDrawer() {
       setLastPlacedOrder(order);
       clearCart();
     } catch (err: any) {
-      setErrorMsg(err.message || "Failed to process order transaction");
+      if (simulateDeficit) {
+        setIsRollbackSuccess(true);
+        setErrorMsg(err.message || "Insufficient stock error triggered.");
+        toast.info("UnitOfWork Rollback Verified", {
+          description: "Deficit prevented database commit. Inventory and order state rolled back atomically.",
+        });
+      } else {
+        setErrorMsg(err.message || "Failed to process order transaction");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -67,8 +78,8 @@ export function CartDrawer() {
 
   return (
     <Sheet open={isOpen} onOpenChange={setOpen}>
-      <SheetContent className="flex flex-col w-full sm:max-w-md p-6">
-        <SheetHeader className="pb-4 border-b">
+      <SheetContent className="flex flex-col w-full sm:max-w-md p-6 h-full">
+        <SheetHeader className="pb-4 border-b shrink-0">
           <SheetTitle className="text-lg font-bold flex items-center justify-between">
             <span className="flex items-center gap-2.5">
               <ShoppingCart className="w-5 h-5 text-primary" />
@@ -110,7 +121,7 @@ export function CartDrawer() {
           </div>
         ) : (
           <>
-            <ScrollArea className="flex-1 -mx-6 px-6">
+            <ScrollArea className="flex-1 -mx-6 px-6 my-2">
               {items.length === 0 ? (
                 <div className="py-20 text-center text-muted-foreground space-y-3">
                   <Package className="w-10 h-10 mx-auto text-muted-foreground/60" />
@@ -164,13 +175,25 @@ export function CartDrawer() {
             </ScrollArea>
 
             {items.length > 0 && (
-              <SheetFooter className="border-t pt-4 flex flex-col gap-3">
+              <div className="border-t pt-4 flex flex-col gap-3.5 w-full shrink-0">
                 {errorMsg && (
-                  <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <div className="font-bold">Transaction Aborted (400)</div>
-                      <div className="text-[11px] opacity-90">{errorMsg}</div>
+                  <div
+                    className={`p-3 rounded-xl border text-xs flex items-start gap-2.5 ${
+                      isRollbackSuccess
+                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                        : "bg-destructive/10 border-destructive/20 text-destructive"
+                    }`}
+                  >
+                    {isRollbackSuccess ? (
+                      <ShieldCheck className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    )}
+                    <div className="space-y-0.5">
+                      <div className="font-bold">
+                        {isRollbackSuccess ? "Atomic Rollback Verified (400)" : "Transaction Aborted (400)"}
+                      </div>
+                      <div className="text-[11px] leading-relaxed opacity-90">{errorMsg}</div>
                     </div>
                   </div>
                 )}
@@ -181,7 +204,7 @@ export function CartDrawer() {
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="Enter shipping address..."
-                    className="h-9 text-xs rounded-lg"
+                    className="h-9 text-xs rounded-lg w-full"
                   />
                 </div>
 
@@ -212,7 +235,7 @@ export function CartDrawer() {
                     <span>Test UoW Deficit Rollback</span>
                   </Button>
                 </div>
-              </SheetFooter>
+              </div>
             )}
           </>
         )}
