@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Category, Product } from "@/types/catalog";
 import { catalogApi } from "../api";
 import { EditProductModal } from "./EditProductModal";
+import { getImageUrl } from "@/lib/api-client";
 import {
   Table,
   TableBody,
@@ -76,7 +77,7 @@ export function ProductManagementTable({ products, categories, onRefresh }: Prod
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center overflow-hidden flex-shrink-0 border">
                         {p.image_url ? (
-                          <img src={p.image_url} alt={p.name} className="w-full h-full object-cover" />
+                          <img src={getImageUrl(p.image_url)} alt={p.name} className="w-full h-full object-cover" />
                         ) : (
                           <Box className="w-5 h-5 text-muted-foreground/60" />
                         )}

@@ -4,6 +4,7 @@ import { Product } from "@/types/catalog";
 import { catalogApi } from "./api";
 import { useAuthStore } from "@/stores/authStore";
 import { useCartStore } from "@/stores/cartStore";
+import { getImageUrl } from "@/lib/api-client";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -107,7 +108,7 @@ export function ProductDetailView() {
         <div className="space-y-4">
           <div className="relative aspect-square w-full bg-secondary/30 rounded-2xl border flex items-center justify-center overflow-hidden">
             {product.image_url ? (
-              <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
+              <img src={getImageUrl(product.image_url)} alt={product.name} className="h-full w-full object-cover" />
             ) : (
               <Box className="w-20 h-20 text-muted-foreground/60" />
             )}
