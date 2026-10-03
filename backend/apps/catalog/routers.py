@@ -44,8 +44,8 @@ class CategoryRouter(BaseRouter[CategoryCreate, CategoryUpdate]):
     tags: ClassVar = ["Categories"]
 
     def get_route_dependencies(self, route_key: RouteKey, action: str) -> list[Any]:
-        """Make category lookup and detail public; restrict listview and mutations to RBAC."""
-        if route_key in (RouteKey.LOOKUP, RouteKey.GET):
+        """Make category browsing public; restrict mutations to RBAC."""
+        if route_key in (RouteKey.GET, RouteKey.GET_ALL, RouteKey.SEARCH, RouteKey.LOOKUP):
             return []
         return super().get_route_dependencies(route_key, action)
 
@@ -68,8 +68,8 @@ class ProductRouter(BaseRouter[ProductCreate, ProductUpdate]):
     expose_schemas = True
 
     def get_route_dependencies(self, route_key: RouteKey, action: str) -> list[Any]:
-        """Allow public access for lookup and product details; require listview/mutations for managers."""
-        if route_key in (RouteKey.LOOKUP, RouteKey.GET):
+        """Allow public access for browsing and listview; mutations require RBAC."""
+        if route_key in (RouteKey.GET, RouteKey.GET_ALL, RouteKey.SEARCH, RouteKey.LOOKUP):
             return []
         return super().get_route_dependencies(route_key, action)
 

@@ -51,7 +51,7 @@ export function CatalogView() {
     }
 
     try {
-      const res = await catalogApi.lookupProducts({
+      const res = await catalogApi.searchProducts({
         filters,
         size: 12,
       });

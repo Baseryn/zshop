@@ -135,17 +135,17 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
               <span>Inspect</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg rounded-2xl">
-            <DialogHeader>
+          <DialogContent className="max-w-lg w-[calc(100vw-2rem)] rounded-2xl p-6 overflow-hidden">
+            <DialogHeader className="pb-2">
               <DialogTitle className="text-base font-semibold flex items-center gap-2">
                 <span>Zchema Raw Payload Inspection</span>
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-3">
+            <div className="space-y-3 min-w-0">
               <div className="text-xs text-muted-foreground">
                 Payload returned for: <span className="text-primary font-bold">{user ? user.email : "Guest"}</span>
               </div>
-              <pre className="bg-muted p-4 rounded-xl border font-mono text-xs leading-relaxed max-h-72 overflow-x-auto text-foreground">
+              <pre className="bg-muted p-4 rounded-xl border font-mono text-xs leading-relaxed max-h-64 overflow-auto text-foreground w-full whitespace-pre break-words">
                 {JSON.stringify(product, null, 2)}
               </pre>
               <p className="text-xs text-muted-foreground">
