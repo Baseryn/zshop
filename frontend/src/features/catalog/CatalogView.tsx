@@ -24,7 +24,7 @@ export function CatalogView() {
   const debouncedSearchQuery = useDebounce(searchQuery, 800);
 
   useEffect(() => {
-    catalogApi.getCategories().then(setCategories).catch(console.error);
+    catalogApi.getCategories().then((cats) => setCategories(Array.isArray(cats) ? cats : [])).catch(console.error);
   }, []);
 
   const loadProducts = useCallback(async () => {
@@ -52,9 +52,10 @@ export function CatalogView() {
         filters,
         size: 12,
       });
-      setProducts(res.items || []);
+      setProducts(Array.isArray(res) ? res : []);
     } catch (err) {
       console.error("Failed to load products:", err);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
