@@ -25,22 +25,22 @@ export function PersonaSwitcher() {
             variant="outline"
             size="sm"
             disabled={isLoading}
-            className="h-9 gap-2 border-border/80 bg-card/60 backdrop-blur-md px-3 text-xs"
+            className="h-9 gap-2 rounded-lg px-3 text-xs"
           >
             {isLoading ? (
-              <RefreshCw className="h-3.5 w-3.5 animate-spin text-brand-500" />
+              <RefreshCw className="h-3.5 w-3.5 animate-spin text-primary" />
             ) : (
-              <Shield className="h-3.5 w-3.5 text-cyber-500" />
+              <Shield className="h-3.5 w-3.5 text-primary" />
             )}
             <span className="font-semibold">{currentConfig.roleTitle}</span>
-            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground opacity-70" />
           </Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="end" className="w-80 p-2 text-xs">
-          <DropdownMenuLabel className="flex items-center justify-between text-muted-foreground pb-1">
+        <DropdownMenuContent align="end" className="w-80 p-2 rounded-xl shadow-lg">
+          <DropdownMenuLabel className="flex items-center justify-between text-muted-foreground pb-1 text-xs">
             <span>ZCORE CONTEXT PERSONA</span>
-            <span className="text-[10px] text-cyber-500">1-CLICK RBAC SWITCH</span>
+            <span className="text-[10px] text-primary font-mono">1-CLICK RBAC SWITCH</span>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
 
@@ -52,21 +52,21 @@ export function PersonaSwitcher() {
               <DropdownMenuItem
                 key={p.id}
                 onClick={() => switchPersona(p.id)}
-                className={`flex flex-col items-start gap-1 p-2.5 cursor-pointer rounded-md transition-colors ${
-                  isSelected ? "bg-accent border border-border" : ""
+                className={`flex flex-col items-start gap-1 p-2.5 cursor-pointer rounded-lg transition-colors ${
+                  isSelected ? "bg-accent border border-border/80" : ""
                 }`}
               >
                 <div className="flex items-center justify-between w-full">
-                  <span className="font-semibold text-foreground">{p.roleTitle}</span>
-                  <Badge variant={p.badgeVariant} className={`text-[10px] px-1.5 py-0 ${p.badgeClass || ""}`}>
+                  <span className="font-semibold text-foreground text-sm">{p.roleTitle}</span>
+                  <Badge variant={p.badgeVariant} className={`text-[10px] px-2 py-0.5 rounded-full ${p.badgeClass || ""}`}>
                     {p.id.toUpperCase()}
                   </Badge>
                 </div>
-                <p className="text-[11px] text-muted-foreground font-sans line-clamp-1">
+                <p className="text-xs text-muted-foreground line-clamp-1">
                   {p.description}
                 </p>
                 {p.email && (
-                  <span className="text-[10px] text-zinc-500">
+                  <span className="text-[11px] text-muted-foreground font-mono">
                     {p.email}
                   </span>
                 )}
@@ -77,7 +77,7 @@ export function PersonaSwitcher() {
       </DropdownMenu>
 
       {user && (
-        <Badge variant="outline" className="hidden sm:inline-flex text-[11px] border-border bg-card/40">
+        <Badge variant="secondary" className="hidden sm:inline-flex text-xs rounded-full">
           Scopes: {user.is_superuser ? "ALL (*)" : user.scopes.length}
         </Badge>
       )}
