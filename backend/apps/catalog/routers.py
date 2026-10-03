@@ -5,7 +5,7 @@ dynamic schema pruning exposure (?schema=true), and secure binary uploads.
 """
 
 import uuid
-from typing import Any, ClassVar
+from typing import ClassVar
 
 from fastapi import File, UploadFile, status
 from zcore import (
@@ -14,7 +14,6 @@ from zcore import (
     Inject,
     PageNumberPagination,
     ResponseWrapper,
-    RouteKey,
 )
 
 from .models import Categories, Products
@@ -42,12 +41,6 @@ class CategoryRouter(BaseRouter[CategoryCreate, CategoryUpdate]):
     prefix = "/categories"
     tags: ClassVar = ["Categories"]
 
-    def get_route_dependencies(self, route_key: RouteKey, action: str) -> list[Any]:
-        """Make reading categories public; restrict modifications to RBAC."""
-        if route_key in (RouteKey.GET, RouteKey.GET_ALL):
-            return []
-        return super().get_route_dependencies(route_key, action)
-
 
 class ProductRouter(BaseRouter[ProductCreate, ProductUpdate]):
     """Advanced Product Router.
@@ -65,12 +58,6 @@ class ProductRouter(BaseRouter[ProductCreate, ProductUpdate]):
     prefix = "/products"
     tags: ClassVar = ["Products"]
     expose_schemas = True
-
-    def get_route_dependencies(self, route_key: RouteKey, action: str) -> list[Any]:
-        """Allow public access for browsing; require permissions for mutations."""
-        if route_key in (RouteKey.GET_ALL, RouteKey.SEARCH, RouteKey.LOOKUP):
-            return []
-        return super().get_route_dependencies(route_key, action)
 
 
 category_router_instance = CategoryRouter()

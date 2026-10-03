@@ -37,10 +37,25 @@ async def seed() -> None:
             description="Operational manager with catalog, stock, and order management scopes.",
             scopes=[
                 # Catalog scopes
-                "categories:create", "categories:view", "categories:listview", "categories:update",
-                "products:create", "products:view", "products:listview", "products:lookup", "products:update",
+                "categories:create",
+                "categories:view",
+                "categories:listview",
+                "categories:lookup",
+                "categories:update",
+                "categories:delete",
+                "products:create",
+                "products:view",
+                "products:listview",
+                "products:lookup",
+                "products:update",
+                "products:delete",
                 # Orders scopes
-                "orders:view", "orders:listview", "orders:update",
+                "orders:create",
+                "orders:view",
+                "orders:listview",
+                "orders:lookup",
+                "orders:update",
+                "orders:delete",
                 # Realtime broadcast scope
                 "notifications:broadcast",
             ],
@@ -52,9 +67,12 @@ async def seed() -> None:
             name="Customer",
             description="Regular shopping customer with restricted internal visibility.",
             scopes=[
-                "categories:view", "categories:listview",
-                "products:view", "products:listview", "products:lookup",
-                "orders:create", "orders:view",
+                "categories:view",
+                "categories:lookup",
+                "products:view",
+                "products:lookup",
+                "orders:create",
+                "orders:view",
             ],
             # Crucial ZCore Feature: Automatically mask confidential margins and notes
             restricted_fields=[
