@@ -8,7 +8,7 @@ export function SSEMonitor() {
   const { events, clearEvents, status } = useRealtimeStore();
 
   return (
-    <div className="space-y-3 font-mono text-xs">
+    <div className="space-y-3 text-xs">
       <div className="flex items-center justify-between pb-2 border-b border-border/40">
         <div className="flex items-center gap-2">
           <Radio className={`w-3.5 h-3.5 ${status === "connected" ? "text-emerald-400 animate-pulse" : "text-zinc-500"}`} />
@@ -39,7 +39,7 @@ export function SSEMonitor() {
           <div className="h-44 flex flex-col items-center justify-center text-muted-foreground font-sans text-xs space-y-2">
             <Activity className="w-6 h-6 text-zinc-600 animate-pulse" />
             <p>Waiting for SSE frames from server dispatcher...</p>
-            <p className="text-[11px] text-zinc-500 font-mono">
+            <p className="text-[11px] text-zinc-500 ">
               Place an order or switch order status to see live events.
             </p>
           </div>

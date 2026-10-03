@@ -18,7 +18,7 @@ export function ZCoreDock() {
         <Button
           onClick={toggleOpen}
           size="sm"
-          className="h-8 gap-2 bg-zinc-950/90 hover:bg-zinc-900 border border-border/80 text-foreground font-mono text-xs rounded-t-lg rounded-b-none shadow-2xl backdrop-blur-md px-3"
+          className="h-8 gap-2 bg-zinc-950/90 hover:bg-zinc-900 border border-border/80 text-foreground text-xs rounded-t-lg rounded-b-none shadow-2xl backdrop-blur-md px-3"
         >
           <Terminal className="w-3.5 h-3.5 text-brand-500" />
           <span className="font-semibold">ZCore Live Inspector</span>
@@ -37,28 +37,28 @@ export function ZCoreDock() {
             <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as DevToolsTab)}>
               <div className="flex items-center justify-between pb-2">
                 <TabsList className="bg-secondary/40 border border-border/50 h-8">
-                  <TabsTrigger value="context" className="text-xs font-mono gap-1.5 h-7">
+                  <TabsTrigger value="context" className="text-xs gap-1.5 h-7">
                     <Shield className="w-3 h-3 text-brand-500" />
                     Context & Zchema
                   </TabsTrigger>
-                  <TabsTrigger value="network" className="text-xs font-mono gap-1.5 h-7">
+                  <TabsTrigger value="network" className="text-xs gap-1.5 h-7">
                     <Activity className="w-3 h-3 text-cyber-500" />
                     Request Tracker
                     {metrics.length > 0 && (
                       <span className="text-[10px] text-muted-foreground ml-1">({metrics.length})</span>
                     )}
                   </TabsTrigger>
-                  <TabsTrigger value="schema" className="text-xs font-mono gap-1.5 h-7">
+                  <TabsTrigger value="schema" className="text-xs gap-1.5 h-7">
                     <Code className="w-3 h-3 text-manager-500" />
                     Dynamic Schema
                   </TabsTrigger>
-                  <TabsTrigger value="sse" className="text-xs font-mono gap-1.5 h-7">
+                  <TabsTrigger value="sse" className="text-xs gap-1.5 h-7">
                     <Radio className="w-3 h-3 text-emerald-400" />
                     SSE Stream
                   </TabsTrigger>
                 </TabsList>
 
-                <div className="text-[11px] font-mono text-muted-foreground hidden sm:block">
+                <div className="text-[11px] text-muted-foreground hidden sm:block">
                   ZShop Framework Inspection Console
                 </div>
               </div>

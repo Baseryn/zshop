@@ -79,8 +79,8 @@ export function ProductDetailView() {
     return (
       <div className="p-12 text-center border border-dashed border-border/60 rounded-xl space-y-4">
         <AlertCircle className="w-10 h-10 text-muted-foreground mx-auto" />
-        <div className="text-sm font-mono font-semibold">Product not found</div>
-        <Button variant="outline" size="sm" onClick={() => navigate("/")} className="font-mono text-xs">
+        <div className="text-sm font-semibold">Product not found</div>
+        <Button variant="outline" size="sm" onClick={() => navigate("/")} className="text-xs">
           Return to Catalog
         </Button>
       </div>
@@ -96,7 +96,7 @@ export function ProductDetailView() {
         variant="ghost"
         size="sm"
         onClick={() => navigate("/")}
-        className="h-8 text-xs font-mono gap-1 text-muted-foreground hover:text-foreground"
+        className="h-8 text-xs gap-1 text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         Back to Catalog
@@ -112,14 +112,14 @@ export function ProductDetailView() {
             )}
 
             <div className="absolute top-3 left-3">
-              <Badge variant="outline" className="font-mono text-xs bg-background/80 backdrop-blur-md">
+              <Badge variant="outline" className="text-xs bg-background/80 backdrop-blur-md">
                 SKU: {product.sku}
               </Badge>
             </div>
           </div>
 
           {canUploadImage && (
-            <Card className="border-border/60 bg-card/40 p-4 font-mono text-xs space-y-3">
+            <Card className="border-border/60 bg-card/40 p-4 text-xs space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Admin Asset Management</span>
                 <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-500/30">
@@ -138,7 +138,7 @@ export function ProductDetailView() {
                 size="sm"
                 disabled={uploading}
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full h-8 text-xs font-mono gap-2 border-dashed border-border/80 hover:border-brand-500"
+                className="w-full h-8 text-xs gap-2 border-dashed border-border/80 hover:border-brand-500"
               >
                 <Upload className="w-3.5 h-3.5 text-brand-500" />
                 <span>{uploading ? "Inspecting & Uploading..." : "Upload New Image (Magic-Bytes Validated)"}</span>
@@ -149,36 +149,36 @@ export function ProductDetailView() {
 
         <div className="space-y-6">
           <div>
-            <h1 className="text-2xl font-bold font-mono tracking-tight text-foreground">{product.name}</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">{product.name}</h1>
             <div className="flex items-center gap-2 mt-2">
               <Badge
                 variant={product.stock_quantity > 0 ? "outline" : "destructive"}
-                className={`text-xs font-mono ${
+                className={`text-xs ${
                   product.stock_quantity > 0 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" : ""
                 }`}
               >
                 {product.stock_quantity > 0 ? `${product.stock_quantity} units available` : "Out of Stock"}
               </Badge>
-              <Badge variant="outline" className="text-xs font-mono text-muted-foreground">
+              <Badge variant="outline" className="text-xs text-muted-foreground">
                 Slug: {product.slug}
               </Badge>
             </div>
           </div>
 
           <div className="border-y border-border/50 py-4 flex items-baseline justify-between">
-            <span className="text-xs font-mono text-muted-foreground uppercase">Retail Price</span>
-            <span className="text-3xl font-bold font-mono text-emerald-400">${Number(product.price).toFixed(2)}</span>
+            <span className="text-xs text-muted-foreground uppercase">Retail Price</span>
+            <span className="text-3xl font-bold text-emerald-400">${Number(product.price).toFixed(2)}</span>
           </div>
 
           <div className="space-y-2">
-            <h3 className="text-xs font-mono text-muted-foreground uppercase tracking-wider">Product Description</h3>
+            <h3 className="text-xs text-muted-foreground uppercase tracking-wider">Product Description</h3>
             <p className="text-sm text-foreground/80 leading-relaxed">
               {product.description || "No descriptive information provided for this product entry."}
             </p>
           </div>
 
           {hasConfidentialData ? (
-            <Card className="border-amber-500/30 bg-amber-500/10 font-mono text-xs">
+            <Card className="border-amber-500/30 bg-amber-500/10 text-xs">
               <CardHeader className="p-4 pb-2">
                 <div className="flex items-center justify-between text-amber-400 font-semibold">
                   <span className="flex items-center gap-1.5">
@@ -203,7 +203,7 @@ export function ProductDetailView() {
               </CardContent>
             </Card>
           ) : (
-            <div className="p-3 rounded-lg border border-dashed border-border/60 bg-secondary/10 flex items-center justify-between text-xs font-mono text-muted-foreground">
+            <div className="p-3 rounded-lg border border-dashed border-border/60 bg-secondary/10 flex items-center justify-between text-xs text-muted-foreground">
               <span className="flex items-center gap-2">
                 <Lock className="w-3.5 h-3.5 text-zinc-500" />
                 Confidential Margin
@@ -215,7 +215,7 @@ export function ProductDetailView() {
           <Button
             onClick={() => addItem(product, 1)}
             disabled={product.stock_quantity <= 0}
-            className="w-full h-10 font-mono text-xs font-semibold gap-2 bg-brand-500 hover:bg-brand-600 text-zinc-950"
+            className="w-full h-10 text-xs font-semibold gap-2 bg-brand-500 hover:bg-brand-600 text-zinc-950"
           >
             <ShoppingCart className="w-4 h-4" />
             <span>Add to Cart</span>

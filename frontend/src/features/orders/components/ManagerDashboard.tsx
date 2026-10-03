@@ -80,15 +80,15 @@ export function ManagerDashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold font-mono tracking-tight text-foreground flex items-center gap-2">
+            <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
               <Truck className="w-5 h-5 text-amber-400" />
               Store Operations Dashboard
             </h2>
-            <Badge variant="outline" className="text-[10px] font-mono border-amber-500/30 text-amber-400 bg-amber-500/10">
+            <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-400 bg-amber-500/10">
               RBAC PROTECTED
             </Badge>
           </div>
-          <p className="text-xs text-muted-foreground font-mono mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Fulfillment state transitions trigger decoupled domain events and broadcast to SSE streams.
           </p>
         </div>
@@ -101,7 +101,7 @@ export function ManagerDashboard() {
             size="sm"
             onClick={fetchOrders}
             disabled={loading}
-            className="h-8 text-xs font-mono gap-1 border-border"
+            className="h-8 text-xs gap-1 border-border"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-brand-500" : ""}`} />
             <span>Reload</span>
@@ -112,19 +112,19 @@ export function ManagerDashboard() {
       <ScopeGate
         scope="orders:view"
         fallback={
-          <Card className="border-destructive/30 bg-destructive/5 text-center p-8 space-y-3 font-mono">
+          <Card className="border-destructive/30 bg-destructive/5 text-center p-8 space-y-3">
             <div className="w-10 h-10 rounded-full bg-destructive/10 border border-destructive/20 text-destructive flex items-center justify-center mx-auto">
               <Lock className="w-5 h-5" />
             </div>
             <CardTitle className="text-sm text-destructive">403 Forbidden - Scope Required</CardTitle>
             <CardDescription className="text-xs max-w-md mx-auto">
-              Your active persona lacks the <span className="text-foreground font-bold font-mono">'orders:view'</span> scope.
+              Your active persona lacks the <span className="text-foreground font-bold">'orders:view'</span> scope.
               Switch to <span className="text-amber-400 font-bold">StoreManager</span> or <span className="text-red-400 font-bold">SuperAdmin</span> via the Persona Switcher in the top header.
             </CardDescription>
           </Card>
         }
       >
-        <Card className="border-border/60 bg-card/40 backdrop-blur-md overflow-hidden font-mono text-xs">
+        <Card className="border-border/60 bg-card/40 backdrop-blur-md overflow-hidden text-xs">
           <CardHeader className="p-4 border-b border-border/40">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -182,10 +182,10 @@ export function ManagerDashboard() {
                           value={o.status}
                           onValueChange={(val) => handleStatusChange(o.id, val as OrderStatus)}
                         >
-                          <SelectTrigger className="h-7 w-32 text-[10px] font-mono bg-zinc-950/60 border-border/60">
+                          <SelectTrigger className="h-7 w-32 text-[10px] bg-zinc-950/60 border-border/60">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="font-mono text-xs">
+                          <SelectContent className="text-xs">
                             {STATUS_OPTIONS.map((opt) => (
                               <SelectItem key={opt} value={opt} className="text-[11px] uppercase">
                                 {opt}

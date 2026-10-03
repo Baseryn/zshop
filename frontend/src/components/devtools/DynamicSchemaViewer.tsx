@@ -22,7 +22,7 @@ export function DynamicSchemaViewer() {
   };
 
   return (
-    <div className="space-y-3 font-mono text-xs">
+    <div className="space-y-3 text-xs">
       <div className="flex items-center justify-between pb-2 border-b border-border/40">
         <div className="flex items-center gap-2">
           <Code2 className="w-4 h-4 text-brand-500" />

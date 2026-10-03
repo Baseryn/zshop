@@ -15,7 +15,7 @@ export function ContextInspector() {
   };
 
   return (
-    <div className="space-y-4 font-mono text-xs">
+    <div className="space-y-4 text-xs">
       <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-border/40">
         <Badge variant="outline" className="gap-1 bg-secondary/30">
           <UserCheck className="w-3 h-3 text-brand-500" />

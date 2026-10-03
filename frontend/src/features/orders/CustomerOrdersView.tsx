@@ -34,7 +34,7 @@ export function CustomerOrdersView() {
 
   if (!user) {
     return (
-      <div className="p-12 text-center border border-dashed border-border/60 rounded-xl space-y-4 font-mono text-xs">
+      <div className="p-12 text-center border border-dashed border-border/60 rounded-xl space-y-4 text-xs">
         <AlertCircle className="w-10 h-10 text-muted-foreground mx-auto" />
         <div className="text-sm font-semibold text-foreground">Authentication Required</div>
         <p className="text-muted-foreground max-w-sm mx-auto">
@@ -45,7 +45,7 @@ export function CustomerOrdersView() {
   }
 
   return (
-    <div className="space-y-6 font-mono text-xs">
+    <div className="space-y-6 text-xs">
       <div className="flex items-center justify-between pb-2 border-b border-border/60">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
