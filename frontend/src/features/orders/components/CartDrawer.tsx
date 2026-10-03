@@ -67,9 +67,9 @@ export function CartDrawer() {
 
   return (
     <Sheet open={isOpen} onOpenChange={setOpen}>
-      <SheetContent className="flex flex-col w-full sm:max-w-md p-6 font-mono text-xs">
+      <SheetContent className="flex flex-col w-full sm:max-w-md p-6 text-xs">
         <SheetHeader className="pb-4 border-b border-border/50">
-          <SheetTitle className="text-base font-mono flex items-center justify-between">
+          <SheetTitle className="text-base flex items-center justify-between">
             <span className="flex items-center gap-2">
               <ShoppingCart className="w-4 h-4 text-brand-500" />
               Shopping Cart
@@ -181,13 +181,13 @@ export function CartDrawer() {
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="Enter shipping address..."
-                    className="h-8 text-xs font-mono"
+                    className="h-8 text-xs"
                   />
                 </div>
 
                 <div className="flex justify-between items-baseline pt-1">
                   <span className="text-muted-foreground text-xs uppercase">Subtotal</span>
-                  <span className="text-lg font-bold text-emerald-400 font-mono">
+                  <span className="text-lg font-bold text-emerald-400">
                     ${totalPrice().toFixed(2)}
                   </span>
                 </div>

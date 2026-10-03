@@ -26,7 +26,7 @@ export function CatalogFilters({
   onReset,
 }: CatalogFiltersProps) {
   return (
-    <div className="space-y-6 font-mono text-xs">
+    <div className="space-y-6 text-xs">
       <div className="flex items-center justify-between pb-2 border-b border-border/50">
         <span className="font-semibold text-foreground tracking-wider uppercase text-[11px]">
           Dynamic Filters
@@ -50,7 +50,7 @@ export function CatalogFilters({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search by name or sku..."
-            className="pl-8 h-8 text-xs font-mono bg-card/60"
+            className="pl-8 h-8 text-xs bg-card/60"
           />
         </div>
       </div>

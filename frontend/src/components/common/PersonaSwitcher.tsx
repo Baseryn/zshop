@@ -25,7 +25,7 @@ export function PersonaSwitcher() {
             variant="outline"
             size="sm"
             disabled={isLoading}
-            className="h-9 gap-2 border-border/80 bg-card/60 backdrop-blur-md px-3 font-mono text-xs"
+            className="h-9 gap-2 border-border/80 bg-card/60 backdrop-blur-md px-3 text-xs"
           >
             {isLoading ? (
               <RefreshCw className="h-3.5 w-3.5 animate-spin text-brand-500" />
@@ -37,7 +37,7 @@ export function PersonaSwitcher() {
           </Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="end" className="w-80 p-2 font-mono text-xs">
+        <DropdownMenuContent align="end" className="w-80 p-2 text-xs">
           <DropdownMenuLabel className="flex items-center justify-between text-muted-foreground pb-1">
             <span>ZCORE CONTEXT PERSONA</span>
             <span className="text-[10px] text-cyber-500">1-CLICK RBAC SWITCH</span>
@@ -66,7 +66,7 @@ export function PersonaSwitcher() {
                   {p.description}
                 </p>
                 {p.email && (
-                  <span className="text-[10px] text-zinc-500 font-mono">
+                  <span className="text-[10px] text-zinc-500">
                     {p.email}
                   </span>
                 )}
@@ -77,7 +77,7 @@ export function PersonaSwitcher() {
       </DropdownMenu>
 
       {user && (
-        <Badge variant="outline" className="hidden sm:inline-flex text-[11px] font-mono border-border bg-card/40">
+        <Badge variant="outline" className="hidden sm:inline-flex text-[11px] border-border bg-card/40">
           Scopes: {user.is_superuser ? "ALL (*)" : user.scopes.length}
         </Badge>
       )}

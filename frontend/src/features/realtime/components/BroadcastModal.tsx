@@ -46,24 +46,24 @@ export function BroadcastModal() {
         <Button
           variant="outline"
           size="sm"
-          className="h-8 gap-1.5 border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 font-mono text-xs"
+          className="h-8 gap-1.5 border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 text-xs"
         >
           <Megaphone className="w-3.5 h-3.5" />
           <span>System Broadcast</span>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-md font-mono text-xs">
+      <DialogContent className="max-w-md text-xs">
         <form onSubmit={handleBroadcast} className="space-y-4">
           <DialogHeader>
-            <DialogTitle className="text-sm font-mono flex items-center gap-2 text-foreground">
+            <DialogTitle className="text-sm flex items-center gap-2 text-foreground">
               <Radio className="w-4 h-4 text-amber-400 animate-pulse" />
               <span>Broadcast System Announcement</span>
             </DialogTitle>
           </DialogHeader>
 
           <p className="text-[11px] text-muted-foreground font-sans">
-            Requires scope: <span className="text-amber-400 font-mono">notifications:broadcast</span>. Emits live SSE frames to all connected listeners.
+            Requires scope: <span className="text-amber-400">notifications:broadcast</span>. Emits live SSE frames to all connected listeners.
           </p>
 
           <div className="space-y-1.5">
@@ -72,7 +72,7 @@ export function BroadcastModal() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Announcement Title..."
-              className="h-8 text-xs font-mono"
+              className="h-8 text-xs "
               required
             />
           </div>
@@ -83,7 +83,7 @@ export function BroadcastModal() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Announcement message content..."
-              className="h-20 text-xs font-mono resize-none"
+              className="h-20 text-xs  resize-none"
               required
             />
           </div>

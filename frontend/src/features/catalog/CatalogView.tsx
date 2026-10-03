@@ -80,7 +80,7 @@ export function CatalogView() {
       </div>
 
       <div className="md:col-span-3 space-y-4">
-        <div className="flex items-center justify-between font-mono text-xs text-muted-foreground pb-2 border-b border-border/40">
+        <div className="flex items-center justify-between text-xs text-muted-foreground pb-2 border-b border-border/40">
           <span>SHOWING {products.length} PRODUCTS</span>
           <Button
             variant="ghost"
@@ -108,7 +108,7 @@ export function CatalogView() {
         ) : products.length === 0 ? (
           <div className="p-12 text-center border border-dashed border-border/60 rounded-xl space-y-3">
             <Package className="w-10 h-10 text-muted-foreground mx-auto" />
-            <div className="text-sm font-mono text-foreground font-semibold">No products found</div>
+            <div className="text-sm text-foreground font-semibold">No products found</div>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
               No products match your active search filters, or no products have been seeded into the database yet.
             </p>

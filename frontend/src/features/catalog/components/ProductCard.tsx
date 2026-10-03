@@ -50,7 +50,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           )}
 
           <div className="absolute top-2 left-2 flex gap-1.5">
-            <Badge variant="outline" className="font-mono text-[10px] bg-background/80 backdrop-blur-md">
+            <Badge variant="outline" className="text-[10px] bg-background/80 backdrop-blur-md">
               SKU: {product.sku}
             </Badge>
           </div>
@@ -58,7 +58,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           <div className="absolute top-2 right-2">
             <Badge
               variant={product.stock_quantity > 0 ? "outline" : "destructive"}
-              className={`text-[10px] font-mono ${
+              className={`text-[10px] ${
                 product.stock_quantity > 0
                   ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
                   : ""
@@ -85,14 +85,14 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
         <CardContent className="p-4 pt-1 space-y-3">
           <div className="flex items-baseline justify-between">
-            <span className="text-xs font-mono text-muted-foreground uppercase">Price</span>
-            <span className="text-xl font-bold font-mono text-emerald-400">
+            <span className="text-xs text-muted-foreground uppercase">Price</span>
+            <span className="text-xl font-bold text-emerald-400">
               ${Number(product.price).toFixed(2)}
             </span>
           </div>
 
           {hasConfidentialData ? (
-            <div className="p-2.5 rounded-md border border-amber-500/30 bg-amber-500/10 space-y-1.5 font-mono text-xs">
+            <div className="p-2.5 rounded-md border border-amber-500/30 bg-amber-500/10 space-y-1.5 text-xs">
               <div className="flex items-center justify-between text-amber-400">
                 <span className="flex items-center gap-1 text-[11px] font-semibold">
                   <ShieldCheck className="w-3.5 h-3.5" />
@@ -115,7 +115,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
               )}
             </div>
           ) : (
-            <div className="p-2 rounded-md border border-dashed border-border/60 bg-secondary/20 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+            <div className="p-2 rounded-md border border-dashed border-border/60 bg-secondary/20 flex items-center justify-between text-[11px] text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <Lock className="w-3 h-3 text-zinc-500" />
                 Confidential Margin
@@ -129,14 +129,14 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       <CardFooter className="p-4 pt-0 flex gap-2">
         <Dialog open={inspectOpen} onOpenChange={setInspectOpen}>
           <DialogTrigger>
-            <Button variant="outline" size="sm" className="h-8 px-2 text-xs font-mono gap-1 border-border">
+            <Button variant="outline" size="sm" className="h-8 px-2 text-xs gap-1 border-border">
               <Eye className="w-3.5 h-3.5 text-cyber-500" />
               <span>Inspect</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg font-mono text-xs">
+          <DialogContent className="max-w-lg text-xs">
             <DialogHeader>
-              <DialogTitle className="text-sm font-mono flex items-center gap-2">
+              <DialogTitle className="text-sm flex items-center gap-2">
                 <span>Zchema Raw Payload Inspection</span>
               </DialogTitle>
             </DialogHeader>

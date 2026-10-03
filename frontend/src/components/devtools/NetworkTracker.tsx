@@ -8,7 +8,7 @@ export function NetworkTracker() {
   const { metrics, clearMetrics, selectedMetric, setSelectedMetric } = useDevToolsStore();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-64 font-mono text-xs">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-64 text-xs">
       <div className="flex flex-col border border-border/50 rounded-lg overflow-hidden bg-zinc-950/40">
         <div className="flex items-center justify-between p-2 border-b border-border/50 bg-secondary/20">
           <span className="text-[11px] text-muted-foreground">HTTP ACTIVITY ({metrics.length})</span>
