@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api-client";
-import { OrderCreate, OrderResponse } from "@/types/orders";
+import { OrderCreate, OrderResponse, OrderStatus } from "@/types/orders";
 
 export const ordersApi = {
   placeOrder: async (data: OrderCreate): Promise<OrderResponse> => {
@@ -16,5 +16,15 @@ export const ordersApi = {
   getOrders: async (): Promise<OrderResponse[]> => {
     const res = await apiClient<any>("/checkout/orders/");
     return Array.isArray(res) ? res : res.items || [];
+  },
+
+  updateOrderStatus: async (id: string, status: OrderStatus, trackingCode?: string): Promise<OrderResponse> => {
+    return await apiClient<OrderResponse>(`/checkout/orders/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        status,
+        tracking_code: trackingCode || undefined,
+      }),
+    });
   },
 };
