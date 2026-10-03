@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Package, RefreshCw } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export function CatalogView() {
   const { activePersona } = useAuthStore();
@@ -19,6 +20,9 @@ export function CatalogView() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { addItem } = useCartStore();
 
+  const debouncedPriceRange = useDebounce(priceRange, 1000);
+  const debouncedSearchQuery = useDebounce(searchQuery, 800);
+
   useEffect(() => {
     catalogApi.getCategories().then(setCategories).catch(console.error);
   }, []);
@@ -27,12 +31,16 @@ export function CatalogView() {
     setLoading(true);
     const filters: SearchFilter[] = [];
 
-    if (searchQuery.trim()) {
-      filters.push({ field: "name", op: "ilike", value: `%${searchQuery.trim()}%` });
+    if (debouncedSearchQuery.trim()) {
+      filters.push({ field: "name", op: "ilike", value: `%${debouncedSearchQuery.trim()}%` });
     }
 
-    if (priceRange[0] > 0 || priceRange[1] < 500) {
-      filters.push({ field: "price", op: "between", value: [priceRange[0], priceRange[1]] });
+    if (debouncedPriceRange[0] > 0 || debouncedPriceRange[1] < 500) {
+      filters.push({
+        field: "price",
+        op: "between",
+        value: [debouncedPriceRange[0], debouncedPriceRange[1]],
+      });
     }
 
     if (selectedCategory) {
@@ -50,7 +58,7 @@ export function CatalogView() {
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, priceRange, selectedCategory]);
+  }, [debouncedSearchQuery, debouncedPriceRange, selectedCategory]);
 
   useEffect(() => {
     loadProducts();
