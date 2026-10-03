@@ -3,6 +3,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { Header } from "@/components/common/Header";
 import { ZCoreDock } from "@/components/devtools/ZCoreDock";
 import { CatalogView } from "@/features/catalog/CatalogView";
+import { CartDrawer } from "@/features/orders/components/CartDrawer";
 
 export default function App() {
   const { fetchMe } = useAuthStore();
@@ -27,12 +28,14 @@ export default function App() {
             </span>
           </div>
           <p className="text-xs text-muted-foreground font-mono mt-1">
-            Experience automatic sensitive data pruning, keyset pagination, and dynamic search.
+            Experience automatic sensitive data pruning, keyset pagination, and atomic transactions.
           </p>
         </div>
 
         <CatalogView />
       </main>
+
+      <CartDrawer />
 
       <ZCoreDock />
     </div>

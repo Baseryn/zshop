@@ -7,6 +7,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Package, RefreshCw } from "lucide-react";
+import { useCartStore } from "@/stores/cartStore";
 
 export function CatalogView() {
   const { activePersona } = useAuthStore();
@@ -16,6 +17,7 @@ export function CatalogView() {
   const [searchQuery, setSearchQuery] = useState("");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const { addItem } = useCartStore();
 
   useEffect(() => {
     catalogApi.getCategories().then(setCategories).catch(console.error);
@@ -114,7 +116,7 @@ export function CatalogView() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard  key={product.id}  product={product}  onAddToCart={(prod) => addItem(prod, 1)}/>
             ))}
           </div>
         )}
