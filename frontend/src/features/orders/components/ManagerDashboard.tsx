@@ -77,14 +77,14 @@ export function ManagerDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border/60">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b">
         <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              <Truck className="w-5 h-5 text-amber-400" />
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+              <Truck className="w-6 h-6 text-amber-500" />
               Store Operations Dashboard
             </h2>
-            <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-400 bg-amber-500/10">
+            <Badge variant="secondary" className="text-xs rounded-full border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 font-mono">
               RBAC PROTECTED
             </Badge>
           </div>
@@ -93,7 +93,7 @@ export function ManagerDashboard() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <BroadcastModal />
 
           <Button
@@ -101,9 +101,9 @@ export function ManagerDashboard() {
             size="sm"
             onClick={fetchOrders}
             disabled={loading}
-            className="h-8 text-xs gap-1 border-border"
+            className="h-9 text-xs gap-1.5 rounded-lg"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-brand-500" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-primary" : ""}`} />
             <span>Reload</span>
           </Button>
         </div>
@@ -112,66 +112,60 @@ export function ManagerDashboard() {
       <ScopeGate
         scope="orders:view"
         fallback={
-          <Card className="border-destructive/30 bg-destructive/5 text-center p-8 space-y-3">
-            <div className="w-10 h-10 rounded-full bg-destructive/10 border border-destructive/20 text-destructive flex items-center justify-center mx-auto">
-              <Lock className="w-5 h-5" />
+          <Card className="border-destructive/30 bg-destructive/5 text-center p-12 space-y-4 rounded-2xl shadow-sm">
+            <div className="w-12 h-12 rounded-full bg-destructive/10 border border-destructive/20 text-destructive flex items-center justify-center mx-auto">
+              <Lock className="w-6 h-6" />
             </div>
-            <CardTitle className="text-sm text-destructive">403 Forbidden - Scope Required</CardTitle>
-            <CardDescription className="text-xs max-w-md mx-auto">
-              Your active persona lacks the <span className="text-foreground font-bold">'orders:view'</span> scope.
-              Switch to <span className="text-amber-400 font-bold">StoreManager</span> or <span className="text-red-400 font-bold">SuperAdmin</span> via the Persona Switcher in the top header.
+            <CardTitle className="text-base text-destructive font-bold">403 Forbidden - Scope Required</CardTitle>
+            <CardDescription className="text-xs max-w-md mx-auto leading-relaxed">
+              Your active persona lacks the <span className="text-foreground font-bold font-mono">'orders:view'</span> scope.
+              Switch to <span className="text-amber-500 font-bold">StoreManager</span> or <span className="text-red-500 font-bold">SuperAdmin</span> via the Persona Switcher in the top header.
             </CardDescription>
           </Card>
         }
       >
-        <Card className="border-border/60 bg-card/40 backdrop-blur-md overflow-hidden text-xs">
-          <CardHeader className="p-4 border-b border-border/40">
+        <Card className="rounded-2xl shadow-sm overflow-hidden border">
+          <CardHeader className="p-5 border-b bg-muted/20">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ShoppingBag className="w-4 h-4 text-cyber-500" />
-                <span className="font-semibold text-foreground text-xs">Orders Registry ({orders.length})</span>
+              <div className="flex items-center gap-2.5">
+                <ShoppingBag className="w-5 h-5 text-primary" />
+                <span className="font-semibold text-foreground text-sm">Orders Registry ({orders.length})</span>
               </div>
-              <span className="text-[10px] text-muted-foreground">Scope: orders:view & orders:update</span>
+              <span className="text-xs text-muted-foreground font-mono">Scope: orders:view & orders:update</span>
             </div>
           </CardHeader>
           <CardContent className="p-0">
             {orders.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground text-xs font-sans">
+              <div className="p-12 text-center text-muted-foreground text-xs">
                 No orders placed yet. Place an order from the catalog first.
               </div>
             ) : (
               <Table>
                 <TableHeader>
-                  <TableRow className="border-border/40 hover:bg-transparent">
-                    <TableHead className="text-[10px] uppercase">Order ID</TableHead>
-                    <TableHead className="text-[10px] uppercase">Customer / User ID</TableHead>
-                    <TableHead className="text-[10px] uppercase">Total</TableHead>
-                    <TableHead className="text-[10px] uppercase">Status</TableHead>
-                    <TableHead className="text-[10px] uppercase">Transition State</TableHead>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-xs uppercase font-semibold">Order ID</TableHead>
+                    <TableHead className="text-xs uppercase font-semibold">Customer / User ID</TableHead>
+                    <TableHead className="text-xs uppercase font-semibold">Total</TableHead>
+                    <TableHead className="text-xs uppercase font-semibold">Status</TableHead>
+                    <TableHead className="text-xs uppercase font-semibold">Transition State</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {orders.map((o) => (
-                    <TableRow key={o.id} className="border-border/30 hover:bg-secondary/20">
-                      <TableCell className="font-bold text-foreground">
+                    <TableRow key={o.id}>
+                      <TableCell className="font-bold text-foreground font-mono">
                         #{o.id.slice(0, 8)}...
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-[10px]">
+                      <TableCell className="text-muted-foreground text-xs font-mono">
                         {o.user_id.slice(0, 13)}...
                       </TableCell>
-                      <TableCell className="text-emerald-400 font-semibold">
+                      <TableCell className="text-primary font-semibold font-mono">
                         ${Number(o.total_amount).toFixed(2)}
                       </TableCell>
                       <TableCell>
                         <Badge
-                          variant="outline"
-                          className={`text-[10px] uppercase ${
-                            o.status === "shipped"
-                              ? "bg-cyber-500/10 text-cyber-500 border-cyber-500/30"
-                              : o.status === "delivered"
-                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                              : "bg-secondary/40 text-muted-foreground"
-                          }`}
+                          variant="secondary"
+                          className="text-xs uppercase rounded-full"
                         >
                           {o.status}
                         </Badge>
@@ -182,12 +176,12 @@ export function ManagerDashboard() {
                           value={o.status}
                           onValueChange={(val) => handleStatusChange(o.id, val as OrderStatus)}
                         >
-                          <SelectTrigger className="h-7 w-32 text-[10px] bg-zinc-950/60 border-border/60">
+                          <SelectTrigger className="h-8 w-36 text-xs rounded-lg">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="text-xs">
+                          <SelectContent className="rounded-xl">
                             {STATUS_OPTIONS.map((opt) => (
-                              <SelectItem key={opt} value={opt} className="text-[11px] uppercase">
+                              <SelectItem key={opt} value={opt} className="text-xs uppercase rounded-md">
                                 {opt}
                               </SelectItem>
                             ))}
