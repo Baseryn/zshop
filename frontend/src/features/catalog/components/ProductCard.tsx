@@ -24,8 +24,10 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const { user } = useAuthStore();
   const [inspectOpen, setInspectOpen] = useState(false);
 
+  const isManager = Boolean(user?.is_superuser || user?.scopes.includes("products:update"));
+
   const hasConfidentialData =
-    product.cost_price !== undefined && product.cost_price !== null;
+    isManager && product.cost_price !== undefined && product.cost_price !== null;
 
   const marginPercentage =
     hasConfidentialData && product.cost_price

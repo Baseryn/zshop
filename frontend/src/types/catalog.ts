@@ -49,3 +49,21 @@ export interface CursorPaginatedResponse<T> {
   next_cursor?: string | null;
   has_more: boolean;
 }
+
+export interface CreateProductPayload {
+  category_id: string;
+  name: string;
+  sku: string;
+  description?: string;
+  price: number;
+  cost_price: number;
+  supplier_notes?: string;
+  stock_quantity: number;
+  is_active?: boolean;
+}
+
+export interface CreateCategoryPayload {
+  name: string;
+  description?: string;
+  is_active?: boolean;
+}

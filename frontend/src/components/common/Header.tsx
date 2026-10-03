@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { PersonaSwitcher } from "./PersonaSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
+import { ScopeGate } from "./ScopeGate";
 import { useCartStore } from "@/stores/cartStore";
 import { useRealtimeStore } from "@/stores/realtimeStore";
 import { Badge } from "@/components/ui/badge";
@@ -51,17 +52,19 @@ export function Header() {
               My Orders
             </NavLink>
 
-            <NavLink
-              to="/operations"
-              className={({ isActive }) =>
-                `flex items-center gap-2 px-3.5 py-2 rounded-lg transition-colors font-medium ${
-                  isActive ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                }`
-              }
-            >
-              <Truck className="w-4 h-4 text-amber-500" />
-              Operations
-            </NavLink>
+            <ScopeGate scope="orders:update">
+              <NavLink
+                to="/operations"
+                className={({ isActive }) =>
+                  `flex items-center gap-2 px-3.5 py-2 rounded-lg transition-colors font-medium ${
+                    isActive ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                  }`
+                }
+              >
+                <Truck className="w-4 h-4 text-amber-500" />
+                Operations
+              </NavLink>
+            </ScopeGate>
           </nav>
         </div>
 
