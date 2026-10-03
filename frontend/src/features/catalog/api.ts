@@ -10,6 +10,14 @@ export const catalogApi = {
     return Array.isArray(res) ? res : res?.items || res?.data || [];
   },
 
+  lookupProducts: async (params: SearchRequest): Promise<Product[]> => {
+    const res = await apiClient<any>("/catalog/products/lookup", {
+      method: "POST",
+      body: JSON.stringify(params),
+    });
+    return Array.isArray(res) ? res : res?.items || res?.data || [];
+  },
+
   getCategories: async (): Promise<Category[]> => {
     const res = await apiClient<any>("/catalog/categories/");
     return Array.isArray(res) ? res : res?.items || res?.data || [];

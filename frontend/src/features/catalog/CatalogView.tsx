@@ -11,7 +11,7 @@ import { useCartStore } from "@/stores/cartStore";
 import { useDebounce } from "@/hooks/useDebounce";
 
 export function CatalogView() {
-  const { activePersona } = useAuthStore();
+  const { activePersona, hasScope } = useAuthStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,10 +48,16 @@ export function CatalogView() {
     }
 
     try {
-      const res = await catalogApi.searchProducts({
+      const searchParams = {
         filters,
         size: 12,
-      });
+      };
+
+      const hasListViewScope = hasScope("products:listview");
+      const res = hasListViewScope
+        ? await catalogApi.searchProducts(searchParams)
+        : await catalogApi.lookupProducts(searchParams);
+
       setProducts(Array.isArray(res) ? res : []);
     } catch (err) {
       console.error("Failed to load products:", err);
@@ -59,7 +65,7 @@ export function CatalogView() {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearchQuery, debouncedPriceRange, selectedCategory]);
+  }, [debouncedSearchQuery, debouncedPriceRange, selectedCategory, hasScope]);
 
   useEffect(() => {
     loadProducts();
