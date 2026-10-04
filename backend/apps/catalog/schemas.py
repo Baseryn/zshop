@@ -59,6 +59,7 @@ class ProductBase(Zchema):
     'cost_price' and 'supplier_notes' demonstrate automatic contextual pruning.
     """
     __model__ = "products"
+    __private__ = {"cost_price", "supplier_notes"}  # noqa: RUF012
 
     category_id: uuid.UUID
     name: str = Field(max_length=200)
