@@ -44,6 +44,8 @@ class JWTAuth(BaseAuth[UserResponse]):
 
 
 # Global singleton instance of the auth backend
-auth_backend = JWTAuth()
+auth_backend = JWTAuth(auto_error=True)
+
+auth_optional = JWTAuth(auto_error=False)
 
 CurrentUser = Annotated[UserResponse, Depends(get_current_user_stub)]
