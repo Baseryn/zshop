@@ -5,7 +5,7 @@ and dynamically hydrates ZContext on every authenticated request.
 """
 
 import uuid
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import Depends
 from zcore import BaseAuth, container
@@ -23,13 +23,15 @@ class JWTAuth(BaseAuth[UserResponse]):
     and automatically populates ctx.user_id, ctx.restricted_fields, and user scopes.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, auto_error: bool = True, **kwargs: Any) -> None:
         super().__init__(
             user_schema=UserResponse,
             identity_claim="sub",
             token_type="access",
             cache_prefix="auth:users",
             cache_ttl=300,
+            auto_error=auto_error,
+            **kwargs,
         )
 
     async def fetch_user(self, identity: str) -> Users | None:
@@ -43,7 +45,8 @@ class JWTAuth(BaseAuth[UserResponse]):
         return await user_service.repository.get(id=user_id)
 
 
-# Global singleton instance of the auth backend
-auth_backend = JWTAuth()
+# Global instances of the auth backend
+auth_backend = JWTAuth(auto_error=True)
+auth_optional = JWTAuth(auto_error=False)
 
 CurrentUser = Annotated[UserResponse, Depends(get_current_user_stub)]
