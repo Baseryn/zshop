@@ -45,3 +45,8 @@ tmp/
 .pytest_cache/
 htmlcov/
 .coverage
+
+*.png
+*.jpg
+*.jpeg
+*.webp

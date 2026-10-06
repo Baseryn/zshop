@@ -1,0 +1,78 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "zshop"
+version = "0.1.0"
+description = "Enterprise Modular Monolith E-Commerce Showcase built with FastAPI and ZCore Framework."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "Ali Alf Ostovar"}
+]
+maintainers = [
+    { name = "Baseryn", email = "support@baseryn.com"}
+]
+dependencies = [
+    "fastapi>=0.110.0",
+    "fastapi-zcore-framework[all]",
+    "pydantic>=2.6.0",
+    "pydantic-settings>=2.2.0",
+    "sqlalchemy[asyncio]>=2.0.28",
+    "asyncpg>=0.29.0",
+    "aiosqlite>=0.20.0",
+    "structlog>=24.1.0",
+    "anyio>=4.3.0",
+    "aiofiles>=23.2.1",
+    "jsonschema>=4.21.0",
+    "python-multipart>=0.0.9",
+    "uvicorn[standard]>=0.22.0",
+    "argon2-cffi>=23.1.0",
+    "pyjwt>=2.8.0",
+    "redis>=5.0.0",
+    "questionary>=2.0.1",
+    "rich>=13.7.0",
+    "alembic>=1.13.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.27.0",
+    "mypy>=1.9.0",
+    "ruff>=0.3.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["apps", "contracts"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = [
+    "E501",
+    "B008",
+    "B024",
+    "B039",
+    "B904",
+    "BLE001",
+    "TRY201",
+    "PYI036",
+    "SIM102",
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["apps"]
+python_files = ["test_*.py"]
