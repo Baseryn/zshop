@@ -1,13 +1,12 @@
 name: ZShop CI Pipeline
 
 on:
-  push:
-    branches: [master, main, develop]
   pull_request:
+    types: [opened, synchronize, reopened]
     branches: [master, main, develop]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -22,14 +21,12 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: frontend/package.json
+          cache-dependency-path: package.json
 
       - name: Install Frontend Dependencies
-        working-directory: frontend
-        run: npm install
+        run: npm ci || npm install
 
       - name: Build Frontend SPA
-        working-directory: frontend
         run: npm run build
         env:
           VITE_API_URL: ""
@@ -45,22 +42,26 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-          cache-dependency-path: backend/requirements.txt
+          cache-dependency-path: backend/pyproject.toml
 
       - name: Upgrade pip and Install Dependencies
+        working-directory: backend
         run: |
           python -m pip install --upgrade pip
-          pip install -r backend/requirements.txt
+          pip install .
           pip install pytest pytest-asyncio ruff
 
       - name: Run Ruff Lint Checks
-        run: ruff check backend/
+        working-directory: backend
+        run: ruff check .
 
       - name: Run ZShop Functional Test Suites
         working-directory: backend
         run: pytest -v
         env:
-          ENV_FILE: .env.example
+          DATABASE_URL: sqlite+aiosqlite:///:memory:
+          DATABASE_TEST_URL: sqlite+aiosqlite:///:memory:
+          SECRET_KEY: test-ci-secret-key-9f83a21bce47d31f08e9a4cb
 
   docker-smoke-test:
     name: Docker Build & E2E Health Check

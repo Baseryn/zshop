@@ -8,7 +8,7 @@ export function useSSE() {
   const { token } = useAuthStore();
   const { setStatus, addEvent } = useRealtimeStore();
   const eventSourceRef = useRef<EventSource | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!token) {
