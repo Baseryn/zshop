@@ -24,10 +24,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ .
 COPY --from=frontend-builder /app/frontend/dist ./dist
 
-RUN if [ ! -f .env ]; then cp .env.example .env; fi \
-    && sed -i 's/HOST=.*/HOST=0.0.0.0/g' .env \
-    && sed -i 's/PORT=.*/PORT=8000/g' .env \
-    && sed -i 's/DATABASE_URL=.*/DATABASE_URL=sqlite+aiosqlite:\/\/\/zshop_dev.db/g' .env
+RUN cp .env.example .env
 
 EXPOSE 8000
 

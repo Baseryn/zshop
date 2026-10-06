@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: zshop-showcase
+    container_name: zshop
     ports:
       - "8000:8000"
     restart: unless-stopped
