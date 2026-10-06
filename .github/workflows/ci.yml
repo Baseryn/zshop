@@ -2,11 +2,12 @@ name: ZShop CI Pipeline
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
-    branches: [master, main, develop]
+    branches: [master, develop]
+  push:
+    branches: [master]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -20,13 +21,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+          cache: "npm"
           cache-dependency-path: package.json
 
-      - name: Install Frontend Dependencies
+      - name: Install Dependencies
         run: npm ci || npm install
 
-      - name: Build Frontend SPA
+      - name: TypeScript & Vite Build
         run: npm run build
         env:
           VITE_API_URL: ""
@@ -41,21 +42,21 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: pip
+          cache: "pip"
           cache-dependency-path: backend/pyproject.toml
 
-      - name: Upgrade pip and Install Dependencies
+      - name: Install Backend Tools & Package
         working-directory: backend
         run: |
           python -m pip install --upgrade pip
+          pip install ruff pytest pytest-asyncio
           pip install .
-          pip install pytest pytest-asyncio ruff
 
-      - name: Run Ruff Lint Checks
+      - name: Ruff Linter Check
         working-directory: backend
         run: ruff check .
 
-      - name: Run ZShop Functional Test Suites
+      - name: Run Pytest Suite
         working-directory: backend
         run: pytest -v
         env:
@@ -64,30 +65,43 @@ jobs:
           SECRET_KEY: test-ci-secret-key-9f83a21bce47d31f08e9a4cb
 
   docker-smoke-test:
-    name: Docker Build & E2E Health Check
+    name: Docker Build & Smoke Test
     needs: [frontend-check, backend-check]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build and Start Container via Docker Compose
+      - name: Build & Run via Docker Compose
         run: docker compose up -d --build
 
-      - name: Wait for Database Migration, Seeding & Server Warmup
+      - name: Wait for Warmup
         run: sleep 12
 
-      - name: Inspect Container Logs (Debugging Context)
+      - name: Inspect Logs (Debug Context)
         run: docker compose logs
 
       - name: Verify Root Health Endpoint
-        run: |
-          curl --fail --retry 5 --retry-delay 2 http://localhost:8000/ || exit 1
+        run: curl --fail --retry 5 --retry-delay 2 http://localhost:8000/ || exit 1
 
-      - name: Verify Public Catalog API Endpoint
-        run: |
-          curl --fail --retry 3 --retry-delay 2 http://localhost:8000/catalog/categories/ || exit 1
-          echo "ZShop container is completely healthy and operational!"
+      - name: Verify Public Categories Endpoint
+        run: curl --fail --retry 3 --retry-delay 2 http://localhost:8000/catalog/categories/ || exit 1
 
-      - name: Teardown Docker Container
+      - name: Teardown Containers
         if: always()
         run: docker compose down
+
+  all-checks-passed:
+    name: all-checks-passed
+    needs: [frontend-check, backend-check, docker-smoke-test]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Verify All Steps Succeeded
+        run: |
+          if [ "${{ needs.frontend-check.result }}" != "success" ] || \
+             [ "${{ needs.backend-check.result }}" != "success" ] || \
+             [ "${{ needs.docker-smoke-test.result }}" != "success" ]; then
+            echo "❌ One or more pipeline stages failed!"
+            exit 1
+          fi
+          echo "🎉 All ZShop CI checks passed successfully!"
