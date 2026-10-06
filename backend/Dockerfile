@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
@@ -9,13 +9,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-ENV PORT=7860
 EXPOSE 7860
 
-RUN mkdir -p /app/storage
-
-ENV DATABASE_URL="sqlite+aiosqlite:///./zshop.db"
-ENV SECRET_KEY="showcase_secret_key_change_me_super_secure_991823"
-ENV DEBUG="false"
-
-CMD alembic upgrade head && python scripts/seed.py && uvicorn main:app --host 0.0.0.0 --port 7860
+CMD alembic upgrade head && python scripts/seed.py && zc run
