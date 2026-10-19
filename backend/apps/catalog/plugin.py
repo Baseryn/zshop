@@ -3,7 +3,7 @@
 from typing import ClassVar
 
 from fastapi import FastAPI
-from zcore import Plugin, StorageProvider, container
+from zcore import Plugin, StorageProvider, container, settings
 from zcore.storage import LocalStorageProvider
 
 from contracts.catalog import ProductContract
@@ -27,7 +27,10 @@ class CatalogPlugin(Plugin):
         # Ensure a singleton StorageProvider is available in the IoC Container
         container.register_singleton(
             StorageProvider,
-            LocalStorageProvider(base_path="./storage", url_prefix="/storage"),
+            LocalStorageProvider(
+                base_path=settings.STORAGE_PATH,
+                url_prefix=settings.STORAGE_URL_PREFIX,
+            ),
         )
 
         app.include_router(category_router_instance.router, prefix="/catalog")

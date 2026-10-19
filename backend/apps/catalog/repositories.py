@@ -1,5 +1,7 @@
 """Data repositories for Categories and Products."""
 
+from typing import Any
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from zcore import BaseRepository
 
@@ -22,3 +24,10 @@ class ProductRepository(BaseRepository[Products]):
     def __init__(self, db: AsyncSession):
         super().__init__(model=Products, db=db)
         self.cursor_field = "created_at"  # Sort and paginate by creation timestamp
+
+    async def get_for_update(self, *criterion: Any, **filters: Any) -> Products | None:
+        """Fetch a single product record acquiring an exclusive row-level lock."""
+        query = self._get_base_query()
+        query = self._apply_filters(query, *criterion, **filters).with_for_update()
+        result = await self.db.execute(query)
+        return result.scalars().first()
