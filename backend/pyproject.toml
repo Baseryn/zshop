@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
 name = "zshop"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Enterprise Modular Monolith E-Commerce Showcase built with FastAPI and ZCore Framework."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -14,6 +14,15 @@ authors = [
 ]
 maintainers = [
     { name = "Baseryn", email = "support@baseryn.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Framework :: FastAPI",
 ]
 dependencies = [
     "fastapi>=0.110.0",
@@ -37,7 +46,7 @@ dependencies = [
     "alembic>=1.13.0",
 ]
 
-[dependency-groups]
+[project.optional-dependencies]
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
@@ -45,6 +54,19 @@ dev = [
     "mypy>=1.9.0",
     "ruff>=0.3.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/Baseryn/zshop"
+Repository = "https://github.com/Baseryn/zshop"
+Documentation = "https://zcore.baseryn.com"
+"Bug Tracker" = "https://github.com/Baseryn/zshop/issues"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+root = ".."
+fallback_version = "0.1.0"
 
 [tool.hatch.build.targets.wheel]
 packages = ["apps", "contracts"]
@@ -71,8 +93,10 @@ ignore = [
 python_version = "3.11"
 strict = true
 ignore_missing_imports = true
+plugins = ["pydantic.mypy"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 testpaths = ["apps"]
 python_files = ["test_*.py"]
