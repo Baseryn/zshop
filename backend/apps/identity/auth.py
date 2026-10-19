@@ -29,7 +29,7 @@ class JWTAuth(BaseAuth[UserResponse]):
             identity_claim="sub",
             token_type="access",
             cache_prefix="auth:users",
-            cache_ttl=300,
+            cache_ttl=None,
             auto_error=auto_error,
             **kwargs,
         )

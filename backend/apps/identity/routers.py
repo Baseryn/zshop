@@ -74,7 +74,7 @@ class UserRouter(BaseRouter[UserCreate, UserUpdate]):
     service = UserService
     pagination_class = PageNumberPagination
     prefix = "/users"
-    tags: ClassVar = ["Users"]
+    tags: ClassVar[list[str]] = ["Users"]
 
 
 class RoleRouter(BaseRouter[RoleCreate, RoleUpdate]):
@@ -86,7 +86,7 @@ class RoleRouter(BaseRouter[RoleCreate, RoleUpdate]):
     service = RoleService
     pagination_class = PageNumberPagination
     prefix = "/roles"
-    tags: ClassVar = ["Roles"]
+    tags: ClassVar[list[str]] = ["Roles"]
 
 
 user_router_instance = UserRouter()
