@@ -7,6 +7,7 @@ and configures request middlewares and global exception handlers.
 
 import sys
 from pathlib import Path
+from typing import Any
 
 # Add backend directory to Python path for clean module resolutions
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -16,11 +17,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from zcore import (
     Kernel,
-    __version__ as zcore_version,
     db_manager,
     register_db_event_dispatcher,
     register_exception_handlers,
     settings,
+)
+from zcore import (
+    __version__ as zcore_version,
 )
 from zcore.logging import setup_logging
 from zcore.web import RequestLogMiddleware, ScopedDependencyMiddleware
@@ -88,8 +91,7 @@ register_exception_handlers(app)
 
 # Root Healthcheck Endpoint
 @app.get("/", tags=["Health"])
-async def root():
-    """Global system status and active framework environment metadata."""
+async def root() -> dict[str, Any]:
     return {
         "status": "healthy",
         "service": settings.PROJECT_NAME,

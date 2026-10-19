@@ -13,7 +13,6 @@ from zcore.testing import setup_test_database
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 
-
 @pytest.fixture(scope="session", autouse=True)
 def initialize_test_database() -> None:
     """Provision the isolated test database schema once for the test session."""

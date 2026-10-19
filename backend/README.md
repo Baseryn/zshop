@@ -52,8 +52,8 @@ class ProductBase(Zchema):
 
     name: str
     price: Decimal
-    cost_price: Decimal      # 🔒 Confidential Margin
-    supplier_notes: str | None # 🔒 Internal Supplier Terms
+    cost_price: Decimal  # 🔒 Confidential Margin
+    supplier_notes: str | None  # 🔒 Internal Supplier Terms
 ```
 
 * **Customer Perspective (`ctx.restricted_fields = {"products.cost_price", "products.supplier_notes"}`):**
@@ -97,13 +97,15 @@ async def place_order(self, user_id: uuid.UUID, schema: OrderCreate) -> Orders:
         # 1. Adjust inventory via decoupled contract
         for item in schema.items:
             await self.inventory_service.adjust_stock(item.product_id, -item.quantity)
-        
+
         # 2. Persist order entity
         self.repository.db.add(new_order)
         await self.repository.db.flush()
 
         # 3. Buffer domain event (Dispatched ONLY after physical commit succeeds)
-        uow.register_event("order.created", {"order_id": str(new_order.id), "user_id": str(user_id)})
+        uow.register_event(
+            "order.created", {"order_id": str(new_order.id), "user_id": str(user_id)}
+        )
 
     return new_order
 ```
@@ -125,7 +127,7 @@ async def handle_order_created(self, payload: dict[str, Any]) -> None:
         event="order.created",
         title="Order Confirmed!",
         message=f"Order #{payload['order_id'][:8]} placed successfully.",
-        data=payload
+        data=payload,
     )
 ```
 

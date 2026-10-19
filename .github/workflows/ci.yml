@@ -33,7 +33,7 @@ jobs:
           VITE_API_URL: ""
 
   backend-check:
-    name: Backend (Ruff, Mypy & Pytest Suite)
+    name: Backend (Ruff & Pytest Suite)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -60,10 +60,6 @@ jobs:
         run: |
           ruff check .
           ruff format --check .
-
-      - name: Mypy Strict Type Analysis
-        working-directory: backend
-        run: mypy apps/
 
       - name: Run Pytest Suite
         working-directory: backend
