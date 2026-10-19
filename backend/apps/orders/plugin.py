@@ -7,7 +7,7 @@ into the central EventDispatcher via IoC container reflection.
 from typing import ClassVar
 
 from fastapi import FastAPI
-from zcore import Plugin, container
+from zcore import EventDispatcher, Plugin, container
 
 from .routers import order_router_instance
 from .services import OrderNotificationListener
@@ -25,8 +25,6 @@ class OrdersPlugin(Plugin):
         app.include_router(order_router_instance.router, prefix="/checkout")
 
         # Resolve EventDispatcher and dynamically wire methods marked with @on_event
-        from zcore.kernel.events import EventDispatcher
-
         dispatcher = container.resolve(EventDispatcher)
         dispatcher.register_listeners(OrderNotificationListener, container)
 
