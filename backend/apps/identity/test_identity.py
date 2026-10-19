@@ -7,9 +7,11 @@ and RBAC permissions using direct ZTestClient context blocks.
 import uuid
 
 import pytest
-from zcore import now
+from zcore import container, now
 from zcore.testing import ZTestClient
 
+from apps.identity.schemas import RoleCreate, UserCreate
+from apps.identity.services import RoleService, UserService
 from main import app
 
 
@@ -65,6 +67,7 @@ async def test_login_authentication_and_jwt_generation() -> None:
     async with ZTestClient(app) as client:
         await client.post("/auth/register", json=register_payload)
 
+        # Login with email
         login_payload = {
             "login": register_payload["email"],
             "password": "Password123!",
@@ -75,6 +78,15 @@ async def test_login_authentication_and_jwt_generation() -> None:
         assert "access_token" in token_envelope
         assert token_envelope["token_type"] == "bearer"
         assert token_envelope["user"]["email"] == register_payload["email"]
+
+        # Login with username
+        login_username_payload = {
+            "login": register_payload["username"],
+            "password": "Password123!",
+        }
+        res_user = await client.post("/auth/login", json=login_username_payload)
+        assert res_user.status_code == 200
+        assert "access_token" in res_user.json()["data"]
 
 
 @pytest.mark.asyncio
@@ -87,6 +99,34 @@ async def test_login_invalid_password_rejection() -> None:
     async with ZTestClient(app) as client:
         response = await client.post("/auth/login", json=login_payload)
         assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_login_inactive_user_rejection() -> None:
+    """Verify disabled or inactive accounts are rejected during login with 401."""
+    unique_suffix = uuid.uuid4().hex[:6]
+    email = f"inactive_{unique_suffix}@example.com"
+    username = f"inactive_{unique_suffix}"
+    raw_password = "Password123!"
+
+    async with ZTestClient(app, user_id=uuid.uuid4(), is_superuser=True) as client:
+        user_service = container.resolve(UserService)
+        await user_service.create(
+            UserCreate(
+                email=email,
+                username=username,
+                first_name="Inactive",
+                password=raw_password,
+                is_active=False,
+            )
+        )
+
+        response = await client.post(
+            "/auth/login",
+            json={"login": email, "password": raw_password},
+        )
+        assert response.status_code == 401
+        assert "disabled" in response.json()["message"].lower()
 
 
 @pytest.mark.asyncio
@@ -113,6 +153,14 @@ async def test_authenticated_profile_endpoint() -> None:
         assert body["success"] is True
         assert body["data"]["email"] == profile_attrs["email"]
         assert "orders:create" in body["data"]["scopes"]
+
+
+@pytest.mark.asyncio
+async def test_unauthenticated_profile_endpoint_rejection() -> None:
+    """Verify accessing /auth/me without active authentication context raises 401."""
+    async with ZTestClient(app) as client:
+        response = await client.get("/auth/me")
+        assert response.status_code == 401
 
 
 @pytest.mark.asyncio
@@ -146,3 +194,66 @@ async def test_superadmin_can_create_roles() -> None:
         )
         assert authorized_response.status_code == 201
         assert authorized_response.json()["data"]["name"] == role_payload["name"]
+
+
+@pytest.mark.asyncio
+async def test_user_soft_delete_lifecycle() -> None:
+    """Verify soft-deleting a user hides it from normal lookups."""
+    unique_suffix = uuid.uuid4().hex[:6]
+
+    async with ZTestClient(app, user_id=uuid.uuid4(), is_superuser=True) as client:
+        user_service = container.resolve(UserService)
+        created_user = await user_service.create(
+            UserCreate(
+                email=f"del_{unique_suffix}@example.com",
+                username=f"del_{unique_suffix}",
+                first_name="To Delete",
+                password="Password123!",
+            )
+        )
+
+        del_resp = await client.delete(f"/identity/users/{created_user.id}")
+        assert del_resp.status_code == 200
+
+        get_resp = await client.get(f"/identity/users/{created_user.id}")
+        assert get_resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_assign_roles_and_aggregate_scopes() -> None:
+    """Verify assigning roles aggregates system scopes and restricted fields on user model."""
+    unique_suffix = uuid.uuid4().hex[:6]
+
+    async with ZTestClient(app, user_id=uuid.uuid4(), is_superuser=True) as client:
+        user_service = container.resolve(UserService)
+        role_service = container.resolve(RoleService)
+
+        created_user = await user_service.create(
+            UserCreate(
+                email=f"roleuser_{unique_suffix}@example.com",
+                username=f"roleuser_{unique_suffix}",
+                first_name="Role User",
+                password="Password123!",
+            )
+        )
+
+        role1 = await role_service.create(
+            RoleCreate(
+                name=f"RoleA_{unique_suffix}",
+                scopes=["products:view"],
+                restricted_fields=["products.cost_price"],
+            )
+        )
+        role2 = await role_service.create(
+            RoleCreate(
+                name=f"RoleB_{unique_suffix}",
+                scopes=["orders:create"],
+                restricted_fields=["products.supplier_notes"],
+            )
+        )
+
+        updated_user = await user_service.assign_roles(created_user.id, [role1.id, role2.id])
+        assert "products:view" in updated_user.all_scopes
+        assert "orders:create" in updated_user.all_scopes
+        assert "products.cost_price" in updated_user.all_restricted_fields
+        assert "products.supplier_notes" in updated_user.all_restricted_fields
