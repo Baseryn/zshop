@@ -24,7 +24,7 @@ async def resolve_stream_user_id(
     seamlessly accommodates both Bearer headers and query token authentications.
     """
     if ctx.user_id:
-        return ctx.user_id
+        return ctx.user_id if isinstance(ctx.user_id, uuid.UUID) else uuid.UUID(str(ctx.user_id))
 
     if token:
         try:
@@ -69,18 +69,13 @@ async def stream_notifications(
 async def broadcast_notification(
     payload: BroadcastRequest,
     service: Inject[RealtimeNotificationService],
-):
+) -> ResponseWrapper:
     """Broadcast notifications to specific users or all active listener queues."""
-    target_ids = payload.target_user_ids or list(service.stream_manager.users_queues.keys())
-
-    for u_id in target_ids:
-        await service.emit_to_user(
-            user_id=u_id,
-            event="system.announcement",
-            title=payload.title,
-            message=payload.message,
-        )
-
+    count = await service.broadcast(
+        title=payload.title,
+        message=payload.message,
+        target_user_ids=payload.target_user_ids,
+    )
     return ResponseWrapper(
-        message=f"Broadcast successfully queued for {len(target_ids)} user(s)."
+        message=f"Broadcast successfully queued for {count} user(s)."
     )

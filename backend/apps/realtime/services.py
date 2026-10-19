@@ -45,9 +45,31 @@ class RealtimeNotificationService:
         await self.stream_manager.publish(user_id=user_id, data=payload_dict)
         logger.info("Dispatched real-time notification to user", user_id=str(user_id))
 
+    async def broadcast(
+        self,
+        title: str,
+        message: str,
+        target_user_ids: list[uuid.UUID] | None = None,
+    ) -> int:
+        """Broadcast an announcement to target users or all active listener queues."""
+        targets = target_user_ids or [
+            u_id if isinstance(u_id, uuid.UUID) else uuid.UUID(str(u_id))
+            for u_id in self.stream_manager.users_queues.keys()
+        ]
+
+        for u_id in targets:
+            await self.emit_to_user(
+                user_id=u_id,
+                event="system.announcement",
+                title=title,
+                message=message,
+            )
+        return len(targets)
+
     async def stream_user_events(
         self,
         user_id: uuid.UUID,
+        keepalive_seconds: float = 25.0,
     ) -> AsyncGenerator[str, None]:
         """Subscribe to user queue and format incoming events into standard SSE frames.
         
@@ -62,10 +84,13 @@ class RealtimeNotificationService:
             while True:
                 try:
                     # Await messages from local memory queue or Redis PubSub
-                    message_data = await queue.get()
-                    event_name = message_data.get("event", "message")
-                    formatted_data = json_dumps(message_data)
-                    yield f"event: {event_name}\ndata: {formatted_data}\n\n"
+                    try:
+                        message_data = await asyncio.wait_for(queue.get(), timeout=keepalive_seconds)
+                        event_name = message_data.get("event", "message")
+                        formatted_data = json_dumps(message_data)
+                        yield f"event: {event_name}\ndata: {formatted_data}\n\n"
+                    except TimeoutError:
+                        yield ": keep-alive\n\n"
                 except asyncio.CancelledError:
                     break
 
