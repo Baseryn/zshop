@@ -54,7 +54,7 @@ class RealtimeNotificationService:
         """Broadcast an announcement to target users or all active listener queues."""
         targets = target_user_ids or [
             u_id if isinstance(u_id, uuid.UUID) else uuid.UUID(str(u_id))
-            for u_id in self.stream_manager.users_queues.keys()
+            for u_id in self.stream_manager.users_queues
         ]
 
         for u_id in targets:
@@ -72,7 +72,7 @@ class RealtimeNotificationService:
         keepalive_seconds: float = 25.0,
     ) -> AsyncGenerator[str, None]:
         """Subscribe to user queue and format incoming events into standard SSE frames.
-        
+
         Yields frames matching the text/event-stream specification:
         'event: <event_name>\ndata: <json_payload>\n\n'
         """
@@ -85,7 +85,9 @@ class RealtimeNotificationService:
                 try:
                     # Await messages from local memory queue or Redis PubSub
                     try:
-                        message_data = await asyncio.wait_for(queue.get(), timeout=keepalive_seconds)
+                        message_data = await asyncio.wait_for(
+                            queue.get(), timeout=keepalive_seconds
+                        )
                         event_name = message_data.get("event", "message")
                         formatted_data = json_dumps(message_data)
                         yield f"event: {event_name}\ndata: {formatted_data}\n\n"

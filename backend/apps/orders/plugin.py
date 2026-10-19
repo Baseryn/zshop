@@ -18,7 +18,10 @@ class OrdersPlugin(Plugin):
 
     name: str = "orders"
     version: str = "0.1.0"
-    dependencies: ClassVar[list[str]] = ["identity", "catalog"]  # Depends on both identity and catalog
+    dependencies: ClassVar[list[str]] = [
+        "identity",
+        "catalog",
+    ]  # Depends on both identity and catalog
 
     def setup(self, app: FastAPI) -> None:
         """Mount order routers and dynamically register event listeners."""

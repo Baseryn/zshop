@@ -24,20 +24,14 @@ async def test_broadcast_announcement_scope_authorization() -> None:
         "message": "Routine server maintenance scheduled.",
     }
 
-    async with ZTestClient(
-        app, user_id=uuid.uuid4(), scopes=["orders:view"]
-    ) as unprivileged:
-        denied_response = await unprivileged.post(
-            "/realtime/broadcast", json=payload
-        )
+    async with ZTestClient(app, user_id=uuid.uuid4(), scopes=["orders:view"]) as unprivileged:
+        denied_response = await unprivileged.post("/realtime/broadcast", json=payload)
         assert denied_response.status_code == 403
 
     async with ZTestClient(
         app, user_id=uuid.uuid4(), scopes=["notifications:broadcast"]
     ) as privileged:
-        authorized_response = await privileged.post(
-            "/realtime/broadcast", json=payload
-        )
+        authorized_response = await privileged.post("/realtime/broadcast", json=payload)
         assert authorized_response.status_code == 200
         assert authorized_response.json()["success"] is True
 
@@ -64,7 +58,9 @@ async def test_sse_stream_initial_handshake_and_ping() -> None:
 async def test_sse_query_token_authentication() -> None:
     """Verify resolve_stream_user_id extracts identity from query token or rejects invalid token."""
     uid = uuid.uuid4()
-    valid_token = Security.create_jwt({"sub": str(uid), "username": "stream_user", "type": "access"})
+    valid_token = Security.create_jwt(
+        {"sub": str(uid), "username": "stream_user", "type": "access"}
+    )
 
     # 1. Valid token resolution
     resolved_id = await resolve_stream_user_id(token=valid_token)
@@ -89,21 +85,25 @@ async def test_event_dispatcher_routes_order_events_to_realtime() -> None:
 
     # 1. Trigger order.created event
     test_order_id = uuid.uuid4()
-    await service.handle_order_created({
-        "order_id": str(test_order_id),
-        "user_id": str(uid),
-        "total_amount": "120.00",
-    })
+    await service.handle_order_created(
+        {
+            "order_id": str(test_order_id),
+            "user_id": str(uid),
+            "total_amount": "120.00",
+        }
+    )
     frame_created = await anext(generator)
     assert "event: order.created" in frame_created
     assert "120.00" in frame_created
 
     # 2. Trigger order.status_changed event
-    await service.handle_order_status_changed({
-        "order_id": str(test_order_id),
-        "user_id": str(uid),
-        "new_status": "shipped",
-    })
+    await service.handle_order_status_changed(
+        {
+            "order_id": str(test_order_id),
+            "user_id": str(uid),
+            "new_status": "shipped",
+        }
+    )
     frame_status = await anext(generator)
     assert "event: order.status_changed" in frame_status
     assert "shipped" in frame_status

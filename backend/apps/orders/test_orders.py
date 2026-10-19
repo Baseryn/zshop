@@ -4,7 +4,6 @@ Tests atomic order placement via UnitOfWork, inventory adjustments via ProductCo
 customer ownership isolation, fulfillment state transitions, and concurrency safety.
 """
 
-import asyncio
 import uuid
 
 import pytest
@@ -63,9 +62,7 @@ async def test_atomic_order_placement_and_inventory_decrement() -> None:
                 }
             ],
         }
-        order_response = await client.post(
-            "/checkout/orders/", json=order_payload
-        )
+        order_response = await client.post("/checkout/orders/", json=order_payload)
         assert order_response.status_code == 201
         order_data = order_response.json()["data"]
         assert float(order_data["total_amount"]) == 240.00
@@ -125,9 +122,7 @@ async def test_order_placement_insufficient_stock_fails_atomically() -> None:
                 }
             ],
         }
-        order_response = await client.post(
-            "/checkout/orders/", json=order_payload
-        )
+        order_response = await client.post("/checkout/orders/", json=order_payload)
         assert order_response.status_code == 400
 
         product_view = await client.get(f"/catalog/products/{product_id}")
@@ -193,9 +188,7 @@ async def test_customer_order_ownership_isolation() -> None:
             "shipping_address": "Confidential Address",
             "items": [{"product_id": str(product_id), "quantity": 1}],
         }
-        order_response = await client_a.post(
-            "/checkout/orders/", json=order_payload
-        )
+        order_response = await client_a.post("/checkout/orders/", json=order_payload)
         order_id = order_response.json()["data"]["id"]
 
         owner_view = await client_a.get(f"/checkout/orders/{order_id}")
@@ -252,7 +245,10 @@ async def test_my_orders_endpoint_scoping() -> None:
         for i in range(2):
             await client_a.post(
                 "/checkout/orders/",
-                json={"shipping_address": f"Address A{i}", "items": [{"product_id": str(prod_a), "quantity": 1}]},
+                json={
+                    "shipping_address": f"Address A{i}",
+                    "items": [{"product_id": str(prod_a), "quantity": 1}],
+                },
             )
 
         resp_a = await client_a.get("/checkout/orders/me")
@@ -264,7 +260,10 @@ async def test_my_orders_endpoint_scoping() -> None:
         prod_b = await _create_test_product(client_b, stock=10, price=15.0)
         await client_b.post(
             "/checkout/orders/",
-            json={"shipping_address": "Address B", "items": [{"product_id": str(prod_b), "quantity": 1}]},
+            json={
+                "shipping_address": "Address B",
+                "items": [{"product_id": str(prod_b), "quantity": 1}],
+            },
         )
 
         resp_b = await client_b.get("/checkout/orders/me")

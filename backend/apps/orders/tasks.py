@@ -21,7 +21,7 @@ async def generate_invoice_and_notify_customer(
     order_repo: OrderRepository,
 ) -> None:
     """Asynchronous background worker generating invoice and dispatching customer notifications.
-    
+
     Notice: 'order_repo' is automatically auto-wired and resolved from the isolated
     background IoC scope with a dedicated AsyncSession!
     """

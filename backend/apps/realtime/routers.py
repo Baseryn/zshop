@@ -16,10 +16,12 @@ realtime_router = APIRouter(prefix="/realtime", tags=["Realtime"])
 
 
 async def resolve_stream_user_id(
-    token: str | None = Query(default=None, description="Optional bearer token for EventSource queries"),
+    token: str | None = Query(
+        default=None, description="Optional bearer token for EventSource queries"
+    ),
 ) -> uuid.UUID:
     """Resolve user identity from authorization headers or EventSource query params.
-    
+
     Standard browser EventSource APIs cannot set custom headers; this resolver
     seamlessly accommodates both Bearer headers and query token authentications.
     """
@@ -46,7 +48,7 @@ async def resolve_stream_user_id(
 async def stream_notifications(
     user_id: Annotated[uuid.UUID, Depends(resolve_stream_user_id)],
     service: Inject[RealtimeNotificationService],
-):
+) -> StreamingResponse:
     """Open persistent SSE connection streaming real-time order and account updates."""
     event_generator = service.stream_user_events(user_id=user_id)
     return StreamingResponse(
@@ -76,6 +78,4 @@ async def broadcast_notification(
         message=payload.message,
         target_user_ids=payload.target_user_ids,
     )
-    return ResponseWrapper(
-        message=f"Broadcast successfully queued for {count} user(s)."
-    )
+    return ResponseWrapper(message=f"Broadcast successfully queued for {count} user(s).")

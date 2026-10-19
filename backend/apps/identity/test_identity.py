@@ -171,9 +171,7 @@ async def test_customer_cannot_create_roles() -> None:
         "scopes": ["orders:view"],
         "description": "Unauthorized role attempt",
     }
-    async with ZTestClient(
-        app, user_id=uuid.uuid4(), scopes=["orders:view"]
-    ) as client:
+    async with ZTestClient(app, user_id=uuid.uuid4(), scopes=["orders:view"]) as client:
         denied_response = await client.post("/identity/roles/", json=role_payload)
         assert denied_response.status_code == 403
 
@@ -186,12 +184,8 @@ async def test_superadmin_can_create_roles() -> None:
         "scopes": ["orders:view", "orders:update"],
         "description": "Authorized role creation",
     }
-    async with ZTestClient(
-        app, user_id=uuid.uuid4(), is_superuser=True
-    ) as client:
-        authorized_response = await client.post(
-            "/identity/roles/", json=role_payload
-        )
+    async with ZTestClient(app, user_id=uuid.uuid4(), is_superuser=True) as client:
+        authorized_response = await client.post("/identity/roles/", json=role_payload)
         assert authorized_response.status_code == 201
         assert authorized_response.json()["data"]["name"] == role_payload["name"]
 
@@ -224,7 +218,7 @@ async def test_assign_roles_and_aggregate_scopes() -> None:
     """Verify assigning roles aggregates system scopes and restricted fields on user model."""
     unique_suffix = uuid.uuid4().hex[:6]
 
-    async with ZTestClient(app, user_id=uuid.uuid4(), is_superuser=True) as client:
+    async with ZTestClient(app, user_id=uuid.uuid4(), is_superuser=True):
         user_service = container.resolve(UserService)
         role_service = container.resolve(RoleService)
 

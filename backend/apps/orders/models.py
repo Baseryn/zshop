@@ -26,7 +26,7 @@ from .enums import OrderStatus
 
 class Orders(Base, SoftDeleteMixin):
     """Aggregate Root representing a customer's purchase order.
-    
+
     Tied to the user who placed it and contains detailed financial totals.
     """
 

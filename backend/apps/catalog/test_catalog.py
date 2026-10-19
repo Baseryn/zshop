@@ -33,9 +33,7 @@ async def test_create_category_slug_generation() -> None:
         "description": "Household appliances",
         "is_active": True,
     }
-    async with ZTestClient(
-        app, user_id=uuid.uuid4(), scopes=["categories:create"]
-    ) as client:
+    async with ZTestClient(app, user_id=uuid.uuid4(), scopes=["categories:create"]) as client:
         response = await client.post("/catalog/categories/", json=payload)
         assert response.status_code == 201
         data = response.json()["data"]
@@ -49,9 +47,7 @@ async def test_create_category_duplicate_name_conflict() -> None:
     """Verify attempting to create a category with a duplicate name raises Conflict (409)."""
     category_name = f"Duplicate Cat {uuid.uuid4().hex[:6]}"
     payload = {"name": category_name, "is_active": True}
-    async with ZTestClient(
-        app, user_id=uuid.uuid4(), scopes=["categories:create"]
-    ) as client:
+    async with ZTestClient(app, user_id=uuid.uuid4(), scopes=["categories:create"]) as client:
         resp1 = await client.post("/catalog/categories/", json=payload)
         assert resp1.status_code == 201
 
@@ -87,9 +83,7 @@ async def test_category_hierarchy_parent_child() -> None:
 async def test_category_unauthorized_mutation_forbidden() -> None:
     """Verify unprivileged customer role cannot create or modify categories."""
     payload = {"name": f"Unauthorized {uuid.uuid4().hex[:6]}"}
-    async with ZTestClient(
-        app, user_id=uuid.uuid4(), scopes=["categories:view"]
-    ) as client:
+    async with ZTestClient(app, user_id=uuid.uuid4(), scopes=["categories:view"]) as client:
         response = await client.post("/catalog/categories/", json=payload)
         assert response.status_code == 403
 
@@ -148,9 +142,7 @@ async def test_zchema_context_aware_data_masking() -> None:
         user_id=uuid.uuid4(),
         scopes=["categories:create", "products:create", "products:view"],
     ) as manager:
-        cat_resp = await manager.post(
-            "/catalog/categories/", json={"name": category_name}
-        )
+        cat_resp = await manager.post("/catalog/categories/", json={"name": category_name})
         assert cat_resp.status_code == 201
         category_id = cat_resp.json()["data"]["id"]
 
@@ -181,9 +173,7 @@ async def test_zchema_context_aware_data_masking() -> None:
         product_payload["category_id"] = cust_cat_resp.json()["data"]["id"]
         product_payload["sku"] = f"SKU-CUST-{uuid.uuid4().hex[:6].upper()}"
 
-        cust_prod_resp = await customer.post(
-            "/catalog/products/", json=product_payload
-        )
+        cust_prod_resp = await customer.post("/catalog/products/", json=product_payload)
         assert cust_prod_resp.status_code == 201
         masked_id = cust_prod_resp.json()["data"]["id"]
 
@@ -191,9 +181,7 @@ async def test_zchema_context_aware_data_masking() -> None:
         assert customer_view.status_code == 200
         cust_data = customer_view.json()["data"]
         assert "cost_price" not in cust_data or cust_data["cost_price"] is None
-        assert (
-            "supplier_notes" not in cust_data or cust_data["supplier_notes"] is None
-        )
+        assert "supplier_notes" not in cust_data or cust_data["supplier_notes"] is None
         assert float(cust_data["price"]) == 180.00
 
         vary_header = customer_view.headers.get("vary", "")
@@ -252,7 +240,10 @@ async def test_zchema_input_mass_assignment_protection() -> None:
         actual_data = verified_view.json()["data"]
         assert float(actual_data["price"]) == 110.0
         assert float(actual_data["cost_price"]) == 50.0
-        assert actual_data["supplier_notes"] is None or actual_data["supplier_notes"] != "Attempted hostile injection"
+        assert (
+            actual_data["supplier_notes"] is None
+            or actual_data["supplier_notes"] != "Attempted hostile injection"
+        )
 
 
 @pytest.mark.asyncio
@@ -421,9 +412,7 @@ async def test_upload_product_cover_image_validation() -> None:
         product_id = product_response.json()["data"]["id"]
 
         script_content = b"<?php echo 'forbidden'; ?>"
-        malicious_upload = {
-            "file": ("script.php", io.BytesIO(script_content), "image/jpeg")
-        }
+        malicious_upload = {"file": ("script.php", io.BytesIO(script_content), "image/jpeg")}
         rejected_response = await client.post(
             f"/catalog/products/{product_id}/image",
             files=malicious_upload,
@@ -431,9 +420,7 @@ async def test_upload_product_cover_image_validation() -> None:
         assert rejected_response.status_code == 400
 
         valid_png_signature = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4"
-        valid_upload = {
-            "file": ("photo.png", io.BytesIO(valid_png_signature), "image/png")
-        }
+        valid_upload = {"file": ("photo.png", io.BytesIO(valid_png_signature), "image/png")}
         accepted_response = await client.post(
             f"/catalog/products/{product_id}/image",
             files=valid_upload,
@@ -464,7 +451,11 @@ async def test_upload_product_file_extension_rejection() -> None:
         prod_id = prod_resp.json()["data"]["id"]
 
         exe_upload = {
-            "file": ("payload.exe", io.BytesIO(b"MZ\x90\x00\x03\x00\x00\x00"), "application/octet-stream")
+            "file": (
+                "payload.exe",
+                io.BytesIO(b"MZ\x90\x00\x03\x00\x00\x00"),
+                "application/octet-stream",
+            )
         }
         resp = await client.post(f"/catalog/products/{prod_id}/image", files=exe_upload)
         assert resp.status_code == 400
@@ -492,9 +483,7 @@ async def test_upload_product_file_size_limit() -> None:
         prod_id = prod_resp.json()["data"]["id"]
 
         oversized_data = b"\x89PNG\r\n\x1a\n" + (b"0" * (4 * 1024 * 1024))
-        oversized_upload = {
-            "file": ("huge.png", io.BytesIO(oversized_data), "image/png")
-        }
+        oversized_upload = {"file": ("huge.png", io.BytesIO(oversized_data), "image/png")}
         resp = await client.post(f"/catalog/products/{prod_id}/image", files=oversized_upload)
         assert resp.status_code == 400
         assert "exceeds the limit" in resp.json()["message"]

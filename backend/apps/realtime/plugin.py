@@ -1,5 +1,6 @@
 """Realtime Plugin registering StreamManager and EventDispatcher listeners."""
 
+import contextlib
 from typing import Any, ClassVar
 
 from fastapi import FastAPI
@@ -53,7 +54,5 @@ class RealtimePlugin(Plugin):
     async def on_shutdown(self) -> None:
         """Safely release distributed Redis pubsub connection if initialized."""
         if self._redis_client:
-            try:
+            with contextlib.suppress(Exception):
                 await self._redis_client.aclose()
-            except Exception:
-                pass

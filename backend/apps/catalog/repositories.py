@@ -17,7 +17,7 @@ class CategoryRepository(BaseRepository[Categories]):
 
 class ProductRepository(BaseRepository[Products]):
     """Data persistence repository for Products.
-    
+
     Configures cursor_field for high-performance keyset pagination.
     """
 

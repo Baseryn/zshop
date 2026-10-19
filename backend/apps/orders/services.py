@@ -14,7 +14,8 @@ from zcore.exceptions import EntityNotFound, ValidationError
 
 from contracts.catalog import ProductContract
 
-from .models import OrderItems, Orders, OrderStatus
+from .enums import OrderStatus
+from .models import OrderItems, Orders
 from .repositories import OrderItemRepository, OrderRepository
 from .schemas import OrderCreate, OrderStatusUpdate
 from .tasks import generate_invoice_and_notify_customer
