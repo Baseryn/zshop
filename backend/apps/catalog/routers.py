@@ -84,12 +84,13 @@ class ProductRouter(BaseRouter[ProductCreate, ProductUpdate]):
             response_model=ResponseWrapper[ProductResponse],
             summary="Upload Product Cover Image",
         )
-        
+
+    @staticmethod
     async def upload_product_image(
         id: uuid.UUID,
         service: Inject[ProductService],
         file: UploadFile = File(...),
-    ):
+    ) -> ResponseWrapper:
         """Upload product image passing through Magic-Bytes inspection and file validation."""
         updated_product = await service.upload_product_image(product_id=id, file=file)
         return ResponseWrapper(

@@ -118,5 +118,6 @@ class ProductLookupResponse(Zchema):
     price: Decimal
     stock_quantity: int
     image_url: str | None = None
+    created_at: ZDateTime | None = None
 
     model_config = ConfigDict(from_attributes=True)
