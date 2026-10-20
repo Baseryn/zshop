@@ -47,10 +47,6 @@ class OrderRouter(BaseRouter[OrderCreate, OrderUpdate]):
     prefix = "/orders"
     tags: ClassVar[list[str]] = ["Orders"]
 
-    def get_route_dependencies(self, route_key: RouteKey, action: str) -> list[Any]:
-        """Automatically bind RBAC scopes generated for the Orders domain."""
-        return [HasScopes(action)]
-
     async def create_endpoint(self, data_in: OrderCreate, service: OrderService) -> ResponseWrapper:
         """Place an order bound to the current authenticated context."""
         user_id = ctx.user_id

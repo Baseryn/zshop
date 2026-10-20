@@ -66,7 +66,6 @@ class ProductRouter(BaseRouter[ProductCreate, ProductUpdate]):
     pagination_class = CursorPagination
     prefix = "/products"
     tags: ClassVar = ["Products"]
-    expose_schemas = True
 
     def get_route_dependencies(self, route_key: RouteKey, action: str) -> list[Any]:
         """Allow public access for browsing and listview; mutations require RBAC."""

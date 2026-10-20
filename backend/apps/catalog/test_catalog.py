@@ -248,13 +248,19 @@ async def test_zchema_input_mass_assignment_protection() -> None:
 
 @pytest.mark.asyncio
 async def test_dynamic_schema_generation_endpoint() -> None:
-    """Verify ?schema=true query generates dynamic JSON Schema definitions on demand."""
+    """Verify /_schema endpoint generates dynamic JSON Schema definitions on demand."""
     async with ZTestClient(app) as client:
-        response = await client.get("/catalog/products/?schema=true")
+        response = await client.get("/catalog/products/_schema?action=view")
         assert response.status_code == 200
         payload = response.json()
         assert payload["success"] is True
         assert "properties" in payload["data"]
+
+        res_all = await client.get("/catalog/products/_schema")
+        assert res_all.status_code == 200
+        all_payload = res_all.json()
+        assert "view" in all_payload["data"]
+        assert "create" in all_payload["data"]
 
 
 @pytest.mark.asyncio
