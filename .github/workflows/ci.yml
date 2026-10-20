@@ -65,9 +65,9 @@ jobs:
         working-directory: backend
         run: pytest -v
         env:
-          DATABASE_URL: sqlite+aiosqlite:///:memory:
-          DATABASE_TEST_URL: sqlite+aiosqlite:///:memory:
-          SECRET_KEY: test-ci-secret-key-9f83a21bce47d31f08e9a4cb
+          DATABASE_URL: "sqlite+aiosqlite:///:memory:"
+          DATABASE_TEST_URL: "sqlite+aiosqlite:///:memory:"
+          SECRET_KEY: "test-ci-secret-key-9f83a21bce47d31f08e9a4cb"
 
   docker-smoke-test:
     name: Docker Build & Smoke Test
