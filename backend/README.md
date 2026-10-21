@@ -54,8 +54,8 @@ class ProductBase(Zchema):
 
     name: str
     price: Decimal
-    cost_price: Decimal          # 🔒 Confidential Margin
-    supplier_notes: str | None   # 🔒 Internal Supplier Terms
+    cost_price: Decimal  # 🔒 Confidential Margin
+    supplier_notes: str | None  # 🔒 Internal Supplier Terms
 ```
 
 * **Customer Perspective (`ctx.restricted_fields = {"products.cost_price", "products.supplier_notes"}`):**

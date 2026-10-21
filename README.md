@@ -73,8 +73,8 @@ class ProductBase(Zchema):
 
     name: str
     price: Decimal
-    cost_price: Decimal          # Restricted for customers; visible to managers
-    supplier_notes: str | None   # Internal note; stripped automatically
+    cost_price: Decimal  # Restricted for customers; visible to managers
+    supplier_notes: str | None  # Internal note; stripped automatically
 ```
 
 ### 2. Contract-Driven Domain Decoupling
@@ -96,7 +96,9 @@ Checkout operations need to be atomic: checking stock, adjusting inventory with 
 ```python
 # apps/orders/services.py
 async def place_order(self, user_id: uuid.UUID, schema: OrderCreate) -> Orders:
-    async with UnitOfWork(session=self.repository.db, dispatcher=self.dispatcher) as uow:
+    async with UnitOfWork(
+        session=self.repository.db, dispatcher=self.dispatcher
+    ) as uow:
         for item in schema.items:
             await self.inventory_service.adjust_stock(item.product_id, -item.quantity)
 
@@ -104,7 +106,9 @@ async def place_order(self, user_id: uuid.UUID, schema: OrderCreate) -> Orders:
         await self.repository.db.flush()
 
         # Events are buffered and only dispatched if the physical DB commit succeeds
-        uow.register_event("order.created", {"order_id": str(new_order.id), "user_id": str(user_id)})
+        uow.register_event(
+            "order.created", {"order_id": str(new_order.id), "user_id": str(user_id)}
+        )
 
     return new_order
 ```

@@ -33,13 +33,17 @@ auth_router = APIRouter(prefix="/auth", tags=["Auth"])
     status_code=status.HTTP_201_CREATED,
     response_model=ResponseWrapper[UserResponse],
 )
-async def register(data_in: UserRegister, service: Inject[UserService]) -> ResponseWrapper[UserResponse]:
+async def register(
+    data_in: UserRegister, service: Inject[UserService]
+) -> ResponseWrapper[UserResponse]:
     user = await service.register(data_in)
     return ResponseWrapper(data=user, message="User registered successfully.")
 
 
 @auth_router.post("/login", response_model=ResponseWrapper[TokenResponse])
-async def login(credentials: UserLogin, service: Inject[UserService]) -> ResponseWrapper[TokenResponse]:
+async def login(
+    credentials: UserLogin, service: Inject[UserService]
+) -> ResponseWrapper[TokenResponse]:
     user, token = await service.authenticate(credentials)
     return ResponseWrapper(
         data=TokenResponse(
