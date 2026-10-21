@@ -60,9 +60,7 @@ class UserService(BaseService[Users]):
             )
         )
 
-        if not user or not Security.verify_password(
-            credentials.password, user.password_hash
-        ):
+        if not user or not Security.verify_password(credentials.password, user.password_hash):
             raise AuthError(message="Invalid username/email or password.")
 
         if not user.is_active:

@@ -66,7 +66,6 @@ class ProductRouter(BaseRouter[ProductCreate, ProductUpdate]):
     pagination_class = CursorPagination
     prefix = "/products"
     tags: ClassVar = ["Products"]
-    expose_schemas = True
 
     def get_route_dependencies(self, route_key: RouteKey, action: str) -> list[Any]:
         """Allow public access for browsing and listview; mutations require RBAC."""
@@ -74,25 +73,30 @@ class ProductRouter(BaseRouter[ProductCreate, ProductUpdate]):
             return [Depends(get_optional_user_stub)]
         return super().get_route_dependencies(route_key, action)
 
+    def register_custom_routes(self) -> None:
+        """Register custom non-standard CRUD endpoints."""
+        self.router.add_api_route(
+            path="/{id}/image",
+            endpoint=self.upload_product_image,
+            methods=[RouteKey.POST],
+            status_code=status.HTTP_200_OK,
+            response_model=ResponseWrapper[ProductResponse],
+            summary="Upload Product Cover Image",
+        )
+
+    @staticmethod
+    async def upload_product_image(
+        id: uuid.UUID,
+        service: Inject[ProductService],
+        file: UploadFile = File(...),
+    ) -> ResponseWrapper:
+        """Upload product image passing through Magic-Bytes inspection and file validation."""
+        updated_product = await service.upload_product_image(product_id=id, file=file)
+        return ResponseWrapper(
+            data=updated_product,
+            message="Product image uploaded successfully.",
+        )
+
 
 category_router_instance = CategoryRouter()
 product_router_instance = ProductRouter()
-
-
-@product_router_instance.router.post(
-    "/{id}/image",
-    status_code=status.HTTP_200_OK,
-    response_model=ResponseWrapper[ProductResponse],
-    summary="Upload Product Cover Image",
-)
-async def upload_product_image(
-    id: uuid.UUID,
-    service: Inject[ProductService],
-    file: UploadFile = File(...),
-):
-    """Upload product image passing through Magic-Bytes inspection and file validation."""
-    updated_product = await service.upload_product_image(product_id=id, file=file)
-    return ResponseWrapper(
-        data=updated_product,
-        message="Product image uploaded successfully.",
-    )

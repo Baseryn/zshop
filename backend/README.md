@@ -6,6 +6,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg)](https://fastapi.tiangolo.com)
 [![SQLAlchemy 2.0](https://img.shields.io/badge/SQLAlchemy-2.0+-red.svg)](https://www.sqlalchemy.org/)
 [![Pydantic V2](https://img.shields.io/badge/Pydantic-V2-e92063.svg)](https://docs.pydantic.dev/)
+[![ZCore Framework](https://img.shields.io/badge/ZCore-0.1.0--rc.3-10b981.svg)](https://github.com/Baseryn/zcore)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 ---
@@ -14,7 +15,7 @@
 
 FastAPI excels at the HTTP routing layer, but real-world enterprise backends quickly encounter architectural pitfalls: leaky abstractions between domains, repetitive DTOs for role-based responses, broken transactional boundaries across repositories, and dangling database sessions in background workers.
 
-**ZShop** is the definitive reference implementation for **ZCore Framework**, demonstrating how to structure high-throughput, enterprise-ready Python applications using **Clean Architecture**, **Domain-Driven Design (DDD)**, and **Event-Driven Modular Monolith** patterns without sacrificing FastAPI's developer ergonomics.
+**ZShop** is the definitive reference implementation for **ZCore Framework (v0.1.0-rc.3)**, demonstrating how to structure high-throughput, enterprise-ready Python applications using **Clean Architecture**, **Domain-Driven Design (DDD)**, and **Event-Driven Modular Monolith** patterns without sacrificing FastAPI's developer ergonomics.
 
 ---
 
@@ -29,8 +30,8 @@ zshop-backend/
 │   └── catalog.py           # ProductContract (get, adjust_stock)
 ├── apps/                    # Independent domain plugins (DAG ordered)
 │   ├── identity/            # RBAC, Argon2id, JWT auth backend, context hydration
-│   ├── catalog/             # Products & Categories, Keyset Cursor, secure storage
-│   ├── orders/              # Atomic UoW, stock decrement, event emission
+│   ├── catalog/             # Products & Categories, Keyset Cursor, row-lock inventory
+│   ├── orders/              # Atomic UoW, stock decrement, deferred event emission
 │   └── realtime/            # SSE streaming, Redis PubSub, live notification dispatch
 ├── scripts/
 │   └── seed.py              # Multi-tier RBAC database provisioner
@@ -49,17 +50,20 @@ Traditional APIs maintain duplicative schemas (`ProductPublic`, `ProductAdmin`, 
 # apps/catalog/schemas.py
 class ProductBase(Zchema):
     __model__ = "products"
+    __private__ = {"cost_price", "supplier_notes"}
 
     name: str
     price: Decimal
-    cost_price: Decimal      # 🔒 Confidential Margin
-    supplier_notes: str | None # 🔒 Internal Supplier Terms
+    cost_price: Decimal  # 🔒 Confidential Margin
+    supplier_notes: str | None  # 🔒 Internal Supplier Terms
 ```
 
 * **Customer Perspective (`ctx.restricted_fields = {"products.cost_price", "products.supplier_notes"}`):**
   Receives only public retail pricing; sensitive fields are completely omitted from JSON payloads.
 * **Store Manager Perspective:**
   Receives complete wholesale transparency across the identical endpoint (`GET /catalog/products/{id}`).
+* **Mass Assignment Protection:**
+  Restricted users attempting to inject `cost_price` into request payloads have those attributes automatically pruned before business validation occurs.
 * **CDN & Proxy Protection:**
   When response data is pruned, ZCore automatically attaches `Vary: Authorization, Cookie` headers to eliminate CDN cache poisoning.
 
@@ -83,7 +87,7 @@ The `CatalogPlugin` registers its concrete `ProductService` into the IoC contain
 container.register_scoped(ProductContract, ProductService)
 ```
 
-`OrderService` simply declares `ProductContract` in its constructor—ZCore's IoC container auto-wires the dependency at runtime without manual `Depends()` chaining.
+`OrderService` simply declares `ProductContract` in its constructor—ZCore's IoC container auto-wires the dependency at runtime via keyword mapping without manual `Depends()` chaining.
 
 ---
 
@@ -94,16 +98,23 @@ A checkout transaction must atomically verify inventory, decrement stock, and re
 # apps/orders/services.py
 async def place_order(self, user_id: uuid.UUID, schema: OrderCreate) -> Orders:
     async with UnitOfWork(session=self.repository.db, dispatcher=self.dispatcher) as uow:
-        # 1. Adjust inventory via decoupled contract
+        # 1. Adjust inventory via decoupled contract (Row-locked via with_for_update)
         for item in schema.items:
             await self.inventory_service.adjust_stock(item.product_id, -item.quantity)
-        
+
         # 2. Persist order entity
         self.repository.db.add(new_order)
         await self.repository.db.flush()
 
         # 3. Buffer domain event (Dispatched ONLY after physical commit succeeds)
-        uow.register_event("order.created", {"order_id": str(new_order.id), "user_id": str(user_id)})
+        uow.register_event(
+            "order.created",
+            {
+                "order_id": str(new_order.id),
+                "user_id": str(new_order.user_id),
+                "total_amount": str(new_order.total_amount),
+            },
+        )
 
     return new_order
 ```
@@ -123,13 +134,13 @@ async def handle_order_created(self, payload: dict[str, Any]) -> None:
     await self.emit_to_user(
         user_id=uuid.UUID(payload["user_id"]),
         event="order.created",
-        title="Order Confirmed!",
-        message=f"Order #{payload['order_id'][:8]} placed successfully.",
-        data=payload
+        title="Order Received!",
+        message=f"Your order #{payload['order_id'][:8]} placed successfully.",
+        data=payload,
     )
 ```
 
-Clients subscribe over standard Server-Sent Events via `GET /realtime/stream`, receiving updates directly through bounded in-memory queues or cluster-wide Redis channels.
+Clients subscribe over Server-Sent Events via `GET /realtime/stream`, receiving updates directly through bounded in-memory queues or cluster-wide Redis channels, complete with automatic keep-alive frames and queue cleanup on disconnect.
 
 ---
 
@@ -141,7 +152,7 @@ Passing request-scoped database sessions to background threads in FastAPI leads 
 @background_task
 async def generate_invoice_and_notify_customer(
     order_id: uuid.UUID,
-    order_repo: OrderRepository,  # Automatically auto-wired with a fresh session!
+    order_repo: OrderRepository,  # Automatically auto-wired with an independent session!
 ) -> None:
     order = await order_repo.get(id=order_id)
     # Background generation executes safely inside its own IoC & DB lifecycle
@@ -163,9 +174,12 @@ Content-Type: application/json
   ],
   "sort": [{"field": "created_at", "order": "desc"}],
   "size": 20,
-  "cursor": "eyJ2YWx1ZSI6ICIyMDI2LTA5LTI1VDA2OjU3OjE2LjYzNzc3OSswMDowMCIsICJwayI6ICI..."
+  "cursor": "eyJ2YWx1ZSI6ICIyMDI2LTEwLTE5VDEyOjAwOjAwKzAwOjAwIiwgInBrIjogIi4uLiJ9"
 }
 ```
+
+* **Compound Sorting:** Preserves deterministic traversal across non-primary-key columns using compound boundary conditions `(col < val) OR (col == val AND pk < last_pk)`.
+* **Mutual Exclusivity:** Enforces Fail-Fast API contracts by rejecting conflicting pagination modes (`cursor` combined with `page > 1`) with standard HTTP 422 errors.
 
 ---
 
@@ -175,7 +189,7 @@ Content-Type: application/json
 * **Python 3.11+**
 * **PostgreSQL** (or SQLite for lightweight exploration)
 * **Redis** (Optional, for cluster pub/sub and distributed caching)
-* Recommended: [`uv`](https://github.com/astral-sh/uv) (Extremely fast Python package manager)
+* Recommended: [`uv`](https://github.com/astral-sh/uv) (Ultra-fast Python package manager)
 
 ### 1. Installation
 
@@ -184,10 +198,10 @@ Content-Type: application/json
 git clone https://github.com/Baseryn/zshop.git
 cd zshop/backend
 
-# Create virtual environment and install dependencies
+# Create virtual environment and install dependencies via uv
 uv venv
 source .venv/bin/activate       # On Windows: .venv\Scripts\activate
-uv pip install -r requirements.txt
+uv pip install -e ".[dev]"
 ```
 
 ### 2. Configure Environment
@@ -200,6 +214,8 @@ cp .env.example .env
 
 Key environment configurations:
 ```ini
+HOST=127.0.0.1
+PORT=8000
 DATABASE_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/zshop_dev
 DATABASE_TEST_URL=postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/zshop_test
 SECRET_KEY=9f83a21bce47d31f08e9a4cb390234acfe7b198234ea68b0c95ef3281048e712
@@ -246,18 +262,20 @@ uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ZShop leverages ZCore's native test engine (`ZTestClient`). Tests execute inside **transactional savepoint rollbacks**, ensuring lightning-fast execution and zero database pollution between test runs:
 
 ```bash
-# Run the entire test suite with coverage
+# Run the entire test suite (45 comprehensive scenarios)
 pytest
 ```
 
-What gets validated out of the box:
-* ✅ Public category browsing vs authenticated mutations
-* ✅ Automatic URL slug generation and conflict resolution
-* ✅ Context-aware field masking for Customers vs Managers
-* ✅ Atomic order checkout with inventory rollback on deficit
-* ✅ Customer order ownership scoping (Multi-tenancy isolation)
-* ✅ Binary Magic-Byte inspection against malicious file uploads (XSS/PHP blocks)
-* ✅ Persistent Server-Sent Events (SSE) handshakes and broadcast permissions
+### Validated Scenarios Out of the Box:
+* ✅ **Catalog Domain:** Public category browsing, slug generation, duplicate SKU rejection, parent-child hierarchies, and custom route binding.
+* ✅ **Data Shielding (`Zchema`):** Selective role-based field pruning for Customers vs Managers, `Vary: Authorization, Cookie` CDN caching protection, and Mass Assignment input stripping.
+* ✅ **Keyset Cursor Pagination:** Non-primary-key compound pagination across successive pages, zero data drift, and Fail-Fast rejection of conflicting `page > 1` + `cursor` parameters.
+* ✅ **Atomic Checkout & UoW:** Multi-item purchase calculations, inventory decrements via `ProductContract`, and full transaction rollbacks on stock deficits.
+* ✅ **Concurrency & Invariant Protection:** Pessimistic row locking (`with_for_update`) preventing negative inventory in high-demand checkouts.
+* ✅ **Customer Ownership & IDOR Protection:** Scoped personal order history (`/checkout/orders/me`) and strict 403 authorization guards against cross-customer order snooping.
+* ✅ **Storage & Payload Security:** MIME type verification, file extension whitelisting, file size limits, and binary Magic-Byte inspection against embedded PHP and stored XSS vectors.
+* ✅ **Realtime Streaming (SSE):** EventSource query token authentication, connection heartbeats (`event: ping`), automatic keep-alive comments, decoupled event routing, and queue memory leak prevention upon disconnect.
+* ✅ **Lifecycle & Soft-Delete:** Audit-safe soft deletions (`deleted_at`) with permanent physical purge support via `?force=true`.
 
 ---
 

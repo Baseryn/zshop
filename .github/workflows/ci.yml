@@ -14,21 +14,22 @@ jobs:
   frontend-check:
     name: Frontend (TypeScript & Vite Build)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 20
-          cache: "npm"
-          cache-dependency-path: package.json
+          bun-version: latest
 
       - name: Install Dependencies
-        run: npm ci || npm install
+        run: bun install
 
       - name: TypeScript & Vite Build
-        run: npm run build
+        run: bun run build
         env:
           VITE_API_URL: ""
 
@@ -37,32 +38,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
-          cache-dependency-path: backend/pyproject.toml
 
-      - name: Install Backend Tools & Package
+      - name: Setup uv (Ultra-Fast Package Manager)
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "backend/pyproject.toml"
+
+      - name: Install Backend Dependencies
+        working-directory: backend
+        run: uv pip install --system -e ".[dev]"
+
+      - name: Ruff Linter & Format Check
         working-directory: backend
         run: |
-          python -m pip install --upgrade pip
-          pip install ruff pytest pytest-asyncio
-          pip install .
-
-      - name: Ruff Linter Check
-        working-directory: backend
-        run: ruff check .
+          ruff check .
+          ruff format --check .
 
       - name: Run Pytest Suite
         working-directory: backend
-        run: pytest -v
+        run: |
+          rm -f test.db
+          pytest -v
         env:
-          DATABASE_URL: sqlite+aiosqlite:///:memory:
-          DATABASE_TEST_URL: sqlite+aiosqlite:///:memory:
-          SECRET_KEY: test-ci-secret-key-9f83a21bce47d31f08e9a4cb
+          DATABASE_URL: "sqlite+aiosqlite:///test.db"
+          DATABASE_TEST_URL: "sqlite+aiosqlite:///test.db"
+          SECRET_KEY: "test-ci-secret-key-9f83a21bce47d31f08e9a4cb"
 
   docker-smoke-test:
     name: Docker Build & Smoke Test

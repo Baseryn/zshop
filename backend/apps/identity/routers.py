@@ -33,15 +33,17 @@ auth_router = APIRouter(prefix="/auth", tags=["Auth"])
     status_code=status.HTTP_201_CREATED,
     response_model=ResponseWrapper[UserResponse],
 )
-async def register(data_in: UserRegister, service: Inject[UserService]):
-    """Register a new customer account."""
+async def register(
+    data_in: UserRegister, service: Inject[UserService]
+) -> ResponseWrapper[UserResponse]:
     user = await service.register(data_in)
     return ResponseWrapper(data=user, message="User registered successfully.")
 
 
 @auth_router.post("/login", response_model=ResponseWrapper[TokenResponse])
-async def login(credentials: UserLogin, service: Inject[UserService]):
-    """Authenticate with credentials and obtain an access token."""
+async def login(
+    credentials: UserLogin, service: Inject[UserService]
+) -> ResponseWrapper[TokenResponse]:
     user, token = await service.authenticate(credentials)
     return ResponseWrapper(
         data=TokenResponse(
@@ -53,8 +55,7 @@ async def login(credentials: UserLogin, service: Inject[UserService]):
 
 
 @auth_router.get("/me", response_model=ResponseWrapper[UserResponse])
-async def get_me(current_user: CurrentUser):
-    """Retrieve the currently authenticated user's profile and active scopes."""
+async def get_me(current_user: CurrentUser) -> ResponseWrapper[UserResponse]:
     return ResponseWrapper(data=current_user)
 
 
@@ -62,11 +63,13 @@ async def get_me(current_user: CurrentUser):
 # Scaffolded Base Routers (Automatic CRUD, Search, Lookup, and Scope Checks)
 # =========================================================================
 
+
 class UserRouter(BaseRouter[UserCreate, UserUpdate]):
     """Scaffolded CRUD router for User management.
-    
+
     Protected automatically by HasScopes against actions: users:view, users:create, etc.
     """
+
     model = Users
     create_schema = UserCreate
     update_schema = UserUpdate
@@ -74,11 +77,12 @@ class UserRouter(BaseRouter[UserCreate, UserUpdate]):
     service = UserService
     pagination_class = PageNumberPagination
     prefix = "/users"
-    tags: ClassVar = ["Users"]
+    tags: ClassVar[list[str]] = ["Users"]
 
 
 class RoleRouter(BaseRouter[RoleCreate, RoleUpdate]):
     """Scaffolded CRUD router for Role management."""
+
     model = Roles
     create_schema = RoleCreate
     update_schema = RoleUpdate
@@ -86,7 +90,7 @@ class RoleRouter(BaseRouter[RoleCreate, RoleUpdate]):
     service = RoleService
     pagination_class = PageNumberPagination
     prefix = "/roles"
-    tags: ClassVar = ["Roles"]
+    tags: ClassVar[list[str]] = ["Roles"]
 
 
 user_router_instance = UserRouter()

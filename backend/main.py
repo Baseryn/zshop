@@ -5,9 +5,9 @@ registers domain plugins with automatic topological dependency resolution,
 and configures request middlewares and global exception handlers.
 """
 
-import os
 import sys
 from pathlib import Path
+from typing import Any
 
 # Add backend directory to Python path for clean module resolutions
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -21,6 +21,9 @@ from zcore import (
     register_db_event_dispatcher,
     register_exception_handlers,
     settings,
+)
+from zcore import (
+    __version__ as zcore_version,
 )
 from zcore.logging import setup_logging
 from zcore.web import RequestLogMiddleware, ScopedDependencyMiddleware
@@ -53,7 +56,7 @@ kernel.add_plugin(RealtimePlugin())
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="High-Performance Modular Monolith Showcase built with FastAPI ZCore Framework.",
-    version="0.1.0-rc.2",
+    version=zcore_version,
     lifespan=kernel.lifespan,
 )
 
@@ -75,7 +78,7 @@ app.add_middleware(
 )
 
 # 8. Mount Static Storage Directory for Uploaded Assets
-os.makedirs(settings.STORAGE_PATH, exist_ok=True)
+Path(settings.STORAGE_PATH).mkdir(parents=True, exist_ok=True)
 app.mount(
     settings.STORAGE_URL_PREFIX,
     StaticFiles(directory=settings.STORAGE_PATH),
@@ -88,12 +91,11 @@ register_exception_handlers(app)
 
 # Root Healthcheck Endpoint
 @app.get("/", tags=["Health"])
-async def root():
-    """Global system status and active framework environment metadata."""
+async def root() -> dict[str, Any]:
     return {
         "status": "healthy",
-        "service": "ZShop API",
+        "service": settings.PROJECT_NAME,
         "framework": "fastapi-zcore-framework",
-        "version": "0.1.0-rc.2",
+        "version": zcore_version,
         "debug": settings.DEBUG,
     }

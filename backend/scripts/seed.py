@@ -99,7 +99,7 @@ async def seed() -> None:
             is_verify=True,
             is_staff=True,
             is_superuser=True,  # Automatically passes all HasScopes checks!
-            roles=[],           # Needs no roles
+            roles=[],  # Needs no roles
         )
 
         # Tier 2: Store Manager (Tests HasScopes enforcement without superuser bypass)

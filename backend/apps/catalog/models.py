@@ -15,7 +15,7 @@ from zcore import Base, SoftDeleteMixin
 
 class Categories(Base, SoftDeleteMixin):
     """Category classification entity.
-    
+
     Supports self-referencing hierarchy and automatic cascade soft-delete scoping.
     """
 
@@ -58,7 +58,7 @@ class Categories(Base, SoftDeleteMixin):
 
 class Products(Base, SoftDeleteMixin):
     """Product entity showcasing data protection via ZCore's Zchema.
-    
+
     Attributes like 'cost_price' and 'supplier_notes' are sensitive and will be
     pruned dynamically based on ctx.restricted_fields for non-privileged users.
     """

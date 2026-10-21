@@ -15,8 +15,10 @@ from zcore import Zchema, ZDateTime
 # Category Schemas
 # ==========================================
 
+
 class CategoryBase(Zchema):
     """Base category attributes."""
+
     __model__ = "categories"
 
     name: str = Field(max_length=100)
@@ -27,11 +29,13 @@ class CategoryBase(Zchema):
 
 class CategoryCreate(CategoryBase):
     """Payload for category creation."""
+
     pass
 
 
 class CategoryUpdate(Zchema):
     """Payload for updating category information."""
+
     __model__ = "categories"
 
     name: str | None = Field(default=None, max_length=100)
@@ -42,6 +46,7 @@ class CategoryUpdate(Zchema):
 
 class CategoryResponse(CategoryBase):
     """Standard category presentation schema."""
+
     id: uuid.UUID
     slug: str
     created_at: ZDateTime
@@ -53,11 +58,13 @@ class CategoryResponse(CategoryBase):
 # Product Schemas
 # ==========================================
 
+
 class ProductBase(Zchema):
     """Base product attributes.
-    
+
     'cost_price' and 'supplier_notes' demonstrate automatic contextual pruning.
     """
+
     __model__ = "products"
     __private__ = {"cost_price", "supplier_notes"}  # noqa: RUF012
 
@@ -75,11 +82,13 @@ class ProductBase(Zchema):
 
 class ProductCreate(ProductBase):
     """Payload for product creation."""
+
     pass
 
 
 class ProductUpdate(Zchema):
     """Payload for modifying product details."""
+
     __model__ = "products"
 
     category_id: uuid.UUID | None = None
@@ -96,6 +105,7 @@ class ProductUpdate(Zchema):
 
 class ProductResponse(ProductBase):
     """Full product presentation schema."""
+
     id: uuid.UUID
     slug: str
     created_at: ZDateTime
@@ -107,9 +117,10 @@ class ProductResponse(ProductBase):
 
 class ProductLookupResponse(Zchema):
     """Minimal projection schema for BaseRouter LOOKUP endpoint.
-    
+
     Provides lightweight entity data for dropdowns, autocomplete, and order items.
     """
+
     __model__ = "products"
 
     id: uuid.UUID
@@ -118,5 +129,6 @@ class ProductLookupResponse(Zchema):
     price: Decimal
     stock_quantity: int
     image_url: str | None = None
+    created_at: ZDateTime | None = None
 
     model_config = ConfigDict(from_attributes=True)

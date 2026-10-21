@@ -47,10 +47,6 @@ class OrderRouter(BaseRouter[OrderCreate, OrderUpdate]):
     prefix = "/orders"
     tags: ClassVar[list[str]] = ["Orders"]
 
-    def get_route_dependencies(self, route_key: RouteKey, action: str) -> list[Any]:
-        """Automatically bind RBAC scopes generated for the Orders domain."""
-        return [HasScopes(action)]
-
     async def create_endpoint(self, data_in: OrderCreate, service: OrderService) -> ResponseWrapper:
         """Place an order bound to the current authenticated context."""
         user_id = ctx.user_id
@@ -73,46 +69,51 @@ class OrderRouter(BaseRouter[OrderCreate, OrderUpdate]):
 
         return ResponseWrapper(data=order)
 
+    def register_custom_routes(self) -> None:
+        """Register custom domain endpoints before route sorting."""
+        self.router.add_api_route(
+            path="/me",
+            endpoint=self.get_my_orders,
+            methods=[RouteKey.GET],
+            status_code=status.HTTP_200_OK,
+            response_model=ResponseWrapper[list[OrderResponse]],
+            dependencies=[Depends(HasScopes("orders:view"))],
+            summary="Get Current User's Orders",
+        )
+        self.router.add_api_route(
+            path="/{id}/status",
+            endpoint=self.update_order_status,
+            methods=[RouteKey.PATCH],
+            status_code=status.HTTP_200_OK,
+            response_model=ResponseWrapper[OrderResponse],
+            dependencies=[Depends(HasScopes("orders:update"))],
+            summary="Update Order Fulfillment Status",
+        )
+
+    async def get_my_orders(
+        self,
+        service: Inject[OrderService],
+    ) -> ResponseWrapper:
+        """Retrieve orders placed specifically by the current authenticated user."""
+        user_id = ctx.user_id
+        if not user_id:
+            raise ForbiddenError(message="Authentication required to view orders.")
+
+        user_orders = await service.get_user_orders(user_id=user_id)
+        return ResponseWrapper(data=user_orders)
+
+    async def update_order_status(
+        self,
+        id: uuid.UUID,
+        status_in: OrderStatusUpdate,
+        service: Inject[OrderService],
+    ) -> ResponseWrapper:
+        """Admin-facing endpoint updating order status and emitting post-commit events."""
+        updated_order = await service.update_status(order_id=id, data_in=status_in)
+        return ResponseWrapper(
+            data=updated_order,
+            message=f"Order status updated to '{status_in.status.value}'.",
+        )
+
 
 order_router_instance = OrderRouter()
-
-
-# Current authenticated customer's personal orders endpoint
-@order_router_instance.router.get(
-    "/me",
-    status_code=status.HTTP_200_OK,
-    response_model=ResponseWrapper[list[OrderResponse]],
-    dependencies=[Depends(HasScopes("orders:view"))],
-    summary="Get Current User's Orders",
-)
-async def get_my_orders(
-    service: Inject[OrderService],
-):
-    """Retrieve orders placed specifically by the current authenticated user."""
-    user_id = ctx.user_id
-    if not user_id:
-        raise ForbiddenError(message="Authentication required to view orders.")
-
-    user_orders = await service.repository.get_list(Orders.user_id == user_id)
-    return ResponseWrapper(data=user_orders)
-
-
-# Administrative Status Transition Endpoint protected by domain scope
-@order_router_instance.router.patch(
-    "/{id}/status",
-    status_code=status.HTTP_200_OK,
-    response_model=ResponseWrapper[OrderResponse],
-    dependencies=[Depends(HasScopes("orders:update"))],
-    summary="Update Order Fulfillment Status",
-)
-async def update_order_status(
-    id: uuid.UUID,
-    status_in: OrderStatusUpdate,
-    service: Inject[OrderService],
-):
-    """Admin-facing endpoint updating order status and emitting post-commit events."""
-    updated_order = await service.update_status(order_id=id, data_in=status_in)
-    return ResponseWrapper(
-        data=updated_order,
-        message=f"Order status updated to '{status_in.status.value}'.",
-    )

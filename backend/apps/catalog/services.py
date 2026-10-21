@@ -102,13 +102,17 @@ class ProductService(BaseService[Products]):
         return await self.get(id=product_id)
 
     async def adjust_stock(self, product_id: Any, quantity_delta: int) -> Products:
-        """Atomically adjust stock count; raises ValidationError on deficit."""
-        product = await self.get(id=product_id)
+        """Atomically adjust stock count with exclusive row lock; raises ValidationError on deficit."""
+        product = await self.repository.get_for_update(self.repository.pk == product_id)
+        if not product:
+            raise EntityNotFound(message=f"Product with id '{product_id}' not found.")
+
         new_quantity = product.stock_quantity + quantity_delta
         if new_quantity < 0:
             raise ValidationError(
                 message=f"Insufficient stock for product '{product.name}'. Available: {product.stock_quantity}"
             )
         product.stock_quantity = new_quantity
+        await self.repository.db.flush()
         await self._safe_commit()
         return product

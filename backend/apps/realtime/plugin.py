@@ -1,9 +1,10 @@
 """Realtime Plugin registering StreamManager and EventDispatcher listeners."""
 
-from typing import ClassVar
+import contextlib
+from typing import Any, ClassVar
 
 from fastapi import FastAPI
-from zcore import Plugin, container, settings
+from zcore import EventDispatcher, Plugin, container, settings
 from zcore.web import StreamManager
 from zcore.web.streams import init_stream_redis
 
@@ -17,6 +18,7 @@ class RealtimePlugin(Plugin):
     name: str = "realtime"
     version: str = "0.1.0"
     dependencies: ClassVar[list[str]] = ["identity"]  # Only depends on identity for auth contracts
+    _redis_client: Any = None
 
     def setup(self, app: FastAPI) -> None:
         """Register StreamManager singleton, mount router, and wire event listeners."""
@@ -28,8 +30,6 @@ class RealtimePlugin(Plugin):
         app.include_router(realtime_router)
 
         # 3. Register @on_event subscribers with global EventDispatcher
-        from zcore.kernel.events import EventDispatcher
-
         dispatcher = container.resolve(EventDispatcher)
         dispatcher.register_listeners(RealtimeNotificationService, container)
 
@@ -43,8 +43,8 @@ class RealtimePlugin(Plugin):
             try:
                 import redis.asyncio as aioredis
 
-                redis_client = aioredis.from_url(redis_url, decode_responses=True)
-                init_stream_redis(redis_client)
+                self._redis_client = aioredis.from_url(redis_url, decode_responses=True)
+                init_stream_redis(self._redis_client)
             except Exception:
                 pass
 
@@ -52,4 +52,7 @@ class RealtimePlugin(Plugin):
         pass
 
     async def on_shutdown(self) -> None:
-        pass
+        """Safely release distributed Redis pubsub connection if initialized."""
+        if self._redis_client:
+            with contextlib.suppress(Exception):
+                await self._redis_client.aclose()

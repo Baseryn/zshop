@@ -12,8 +12,10 @@ from zcore import Zchema, ZDateTime
 # Role Schemas
 # ==========================================
 
+
 class RoleBase(Zchema):
     """Base schema for roles, mapped to the 'roles' domain."""
+
     __model__ = "roles"
 
     name: str = Field(max_length=100)
@@ -25,11 +27,13 @@ class RoleBase(Zchema):
 
 class RoleCreate(RoleBase):
     """Payload schema for creating a new RBAC role."""
+
     pass
 
 
 class RoleUpdate(Zchema):
     """Payload schema for updating role attributes."""
+
     __model__ = "roles"
 
     name: str | None = Field(default=None, max_length=100)
@@ -41,6 +45,7 @@ class RoleUpdate(Zchema):
 
 class RoleResponse(RoleBase):
     """Output presentation schema for roles."""
+
     id: uuid.UUID
 
     model_config = ConfigDict(from_attributes=True)
@@ -50,8 +55,10 @@ class RoleResponse(RoleBase):
 # User Schemas
 # ==========================================
 
+
 class UserBase(Zchema):
     """Base schema for users, mapped to the 'users' domain for contextual pruning."""
+
     __model__ = "users"
 
     email: EmailStr
@@ -65,12 +72,14 @@ class UserBase(Zchema):
 
 class UserCreate(UserBase):
     """Payload schema for creating a user via the admin or user management router."""
+
     password: str = Field(min_length=6, max_length=128, exclude=True)
     role_ids: list[uuid.UUID] = Field(default_factory=list, exclude=True)
 
 
 class UserUpdate(Zchema):
     """Payload schema for updating user properties."""
+
     __model__ = "users"
 
     email: EmailStr | None = None
@@ -78,16 +87,15 @@ class UserUpdate(Zchema):
     last_name: str | None = Field(default=None, max_length=75)
     avatar_url: str | None = None
     is_active: bool | None = None
-    password: str | None = Field(
-        default=None, min_length=6, max_length=128, exclude=True
-    )
+    password: str | None = Field(default=None, min_length=6, max_length=128, exclude=True)
 
 
 class UserResponse(UserBase):
     """Public/Authenticated user projection schema.
-    
+
     Includes aggregated scopes and restricted fields used by ZCore's BaseAuth.
     """
+
     id: uuid.UUID
     is_superuser: bool
     is_staff: bool
@@ -103,6 +111,7 @@ class UserResponse(UserBase):
 # Authentication Schemas
 # ==========================================
 
+
 class UserRegister(BaseModel):
     """Registration schema accepting plaintext password excluded from direct model dumps."""
 
@@ -115,12 +124,14 @@ class UserRegister(BaseModel):
 
 class UserLogin(BaseModel):
     """Login credentials schema accepting email or username."""
+
     login: str = Field(description="Username or Email address")
     password: str = Field(min_length=6, max_length=128)
 
 
 class TokenResponse(BaseModel):
     """Standard OAuth2-compliant Bearer token response envelope."""
+
     access_token: str
     token_type: str = "bearer"
     user: UserResponse

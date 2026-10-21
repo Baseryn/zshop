@@ -4,6 +4,7 @@ Fully decoupled using Protocols and ZCore's IoC Container and UnitOfWork.
 """
 
 import uuid
+from collections.abc import Sequence
 from decimal import Decimal
 from typing import Any
 
@@ -13,7 +14,8 @@ from zcore.exceptions import EntityNotFound, ValidationError
 
 from contracts.catalog import ProductContract
 
-from .models import OrderItems, Orders, OrderStatus
+from .enums import OrderStatus
+from .models import OrderItems, Orders
 from .repositories import OrderItemRepository, OrderRepository
 from .schemas import OrderCreate, OrderStatusUpdate
 from .tasks import generate_invoice_and_notify_customer
@@ -35,6 +37,10 @@ class OrderService(BaseService[Orders]):
         self.item_repository = item_repository
         self.inventory_service = inventory_service
         self.dispatcher = dispatcher
+
+    async def get_user_orders(self, user_id: uuid.UUID) -> Sequence[Orders]:
+        """Retrieve all orders belonging to a specific user."""
+        return await self.repository.get_list(self.model.user_id == user_id)
 
     async def place_order(self, user_id: uuid.UUID, schema: OrderCreate) -> Orders:
         """Place an order atomically using UnitOfWork and InventoryContract.
