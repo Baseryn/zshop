@@ -1,13 +1,13 @@
-FROM node:20-alpine AS frontend-builder
+FROM oven/bun:1-alpine AS frontend-builder
 
 WORKDIR /app/frontend
 
-COPY frontend/package*.json ./
-RUN npm ci || npm install
+COPY frontend/package.json frontend/bun.lock ./
+RUN bun install
 
 COPY frontend/ ./
 ENV VITE_API_URL=/api
-RUN npm run build
+RUN bun run build
 
 FROM python:3.12-slim
 

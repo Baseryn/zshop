@@ -10,6 +10,8 @@ services:
       - HOST=0.0.0.0
       - PORT=8000
       - DEBUG=False
+      - DATABASE_URL=sqlite+aiosqlite:///storage/zshop.db
+      - SECRET_KEY=docker-smoke-test-secret-key-minimum-32-chars
     volumes:
       - zshop_storage:/app/storage
     restart: unless-stopped
