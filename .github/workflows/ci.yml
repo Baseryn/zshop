@@ -20,18 +20,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 20
-          cache: "npm"
-          cache-dependency-path: frontend/package.json
+          bun-version: latest
 
       - name: Install Dependencies
-        run: npm install --legacy-peer-deps
+        run: bun install
 
       - name: TypeScript & Vite Build
-        run: npm run build
+        run: bun run build
         env:
           VITE_API_URL: ""
 
@@ -66,10 +64,12 @@ jobs:
 
       - name: Run Pytest Suite
         working-directory: backend
-        run: pytest -v
+        run: |
+          rm -f test.db
+          pytest -v
         env:
-          DATABASE_URL: "sqlite+aiosqlite:///:memory:"
-          DATABASE_TEST_URL: "sqlite+aiosqlite:///:memory:"
+          DATABASE_URL: "sqlite+aiosqlite:///test.db"
+          DATABASE_TEST_URL: "sqlite+aiosqlite:///test.db"
           SECRET_KEY: "test-ci-secret-key-9f83a21bce47d31f08e9a4cb"
 
   docker-smoke-test:

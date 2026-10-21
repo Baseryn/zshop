@@ -7,10 +7,15 @@ directly manage their own isolation and contexts via ZTestClient.
 import sys
 from pathlib import Path
 
+# Add backend directory to Python path first
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
 import pytest
 from zcore.testing import setup_test_database
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+import apps.catalog.models
+import apps.identity.models
+import apps.orders.models  # noqa: F401
 
 
 @pytest.fixture(scope="session", autouse=True)
